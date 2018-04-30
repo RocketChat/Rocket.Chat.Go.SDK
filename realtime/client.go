@@ -3,7 +3,10 @@ package realtime
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
+	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/gopackage/ddp"
@@ -14,22 +17,27 @@ type Client struct {
 }
 
 // Creates a new instance and connects to the websocket.
-func NewClient(host string, ssl bool, debug bool) (*Client, error) {
+func NewClient(serverUrl *url.URL, debug bool) (*Client, error) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	wsUrl := "ws"
-	origin := "http"
+	port := 80
 
-	if ssl {
+	if serverUrl.Scheme == "https" {
 		wsUrl = "wss"
-		origin = "https"
+		port = 443
 	}
 
-	wsUrl = fmt.Sprintf("%s://%v/websocket", wsUrl, host)
-	origin = fmt.Sprintf("%s://%v", origin, host)
+	if len(serverUrl.Port()) > 0 {
+		port, _ = strconv.Atoi(serverUrl.Port())
+	}
+
+	wsUrl = fmt.Sprintf("%s://%v:%v/websocket", wsUrl, serverUrl.Hostname(), port)
+
+	log.Println("About to connect to:", wsUrl, port, serverUrl.Scheme)
 
 	c := new(Client)
-	c.ddp = ddp.NewClient(wsUrl, origin)
+	c.ddp = ddp.NewClient(wsUrl, serverUrl.String())
 
 	if debug {
 		c.ddp.SetSocketLogActive(true)
@@ -52,6 +60,10 @@ func (s statusListener) Status(status int) {
 
 func (c *Client) AddStatusListener(listener func(int)) {
 	c.ddp.AddStatusListener(statusListener{listener: listener})
+}
+
+func (c *Client) Reconnect() {
+	c.ddp.Reconnect()
 }
 
 // ConnectionAway sets connection status to away
