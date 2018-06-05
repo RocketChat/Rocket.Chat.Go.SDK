@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"fmt"
+	"net/url"
 	"testing"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/common_testing"
@@ -32,7 +32,7 @@ func getAuthenticatedClient(t *testing.T, name, email, password string) *Client 
 	client := Client{Protocol: common_testing.Protocol, Host: common_testing.Host, Port: common_testing.Port}
 	credentials := models.UserCredentials{Name: name, Email: email, Password: password}
 
-	rtClient, err := realtime.NewClient(fmt.Sprintf("%s:%s", common_testing.Host, common_testing.Port), false, true)
+	rtClient, err := realtime.NewClient(&url.URL{Host: common_testing.Host + ":" + common_testing.Port}, true)
 	assert.Nil(t, err)
 	_, regErr := rtClient.RegisterUser(&credentials)
 	assert.Nil(t, regErr)
