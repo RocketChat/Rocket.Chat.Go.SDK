@@ -3,6 +3,7 @@ package realtime
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"strconv"
 
 	"github.com/Jeffail/gabs"
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
@@ -60,11 +61,23 @@ func (c *Client) Login(credentials *models.UserCredentials) (*models.User, error
 	return getUserFromData(rawResponse.(map[string]interface{})), err
 }
 
+// Auth a user. Using an authentication token to login.
+//
+// https://rocket.chat/docs/developer-guides/realtime-api/method-calls/login/#using-an-authentication-token
+func (c *Client) Auth(token string) (*models.User, error) {
+	rawResponse, err := c.ddp.Call("login", ddpTokenLoginRequest{Token: token})
+
+	return getUserFromData(rawResponse.(map[string]interface{})), err
+}
+
 func getUserFromData(data interface{}) *models.User {
 	document, _ := gabs.Consume(data)
 
+	expires, _ := strconv.ParseFloat(stringOrZero(document.Path("tokenExpires.$date").Data()), 64)
 	return &models.User{
-		Id: stringOrZero(document.Path("id").Data()),
+		Id:           stringOrZero(document.Path("id").Data()),
+		Token:        stringOrZero(document.Path("token").Data()),
+		TokenExpires: int64(expires),
 	}
 }
 
