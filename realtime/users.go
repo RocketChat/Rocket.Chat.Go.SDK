@@ -47,27 +47,38 @@ func (c *Client) RegisterUser(credentials *models.UserCredentials) (*models.User
 	return user, nil
 }
 
-// Login a user. The password and the email are not allowed to be nil.
+// Login a user.
+// token shouldn't be nil, otherwise the password and the email are not allowed to be nil.
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/login/
 func (c *Client) Login(credentials *models.UserCredentials) (*models.User, error) {
+	var request interface{}
+	if credentials.Token != "" {
+		request = ddpTokenLoginRequest{
+			Token: credentials.Token,
+		}
+	} else {
+		digest := sha256.Sum256([]byte(credentials.Password))
+		request = ddpLoginRequest{
+			User: ddpUser{Email: credentials.Email},
+			Password: ddpPassword{
+				Digest:    hex.EncodeToString(digest[:]),
+				Algorithm: "sha-256",
+			},
+		}
+	}
 
-	digest := sha256.Sum256([]byte(credentials.Password))
+	rawResponse, err := c.ddp.Call("login", request)
+	if err != nil {
+		return nil, err
+	}
 
-	rawResponse, err := c.ddp.Call("login", ddpLoginRequest{
-		User:     ddpUser{Email: credentials.Email},
-		Password: ddpPassword{Digest: hex.EncodeToString(digest[:]), Algorithm: "sha-256"}})
+	user := getUserFromData(rawResponse.(map[string]interface{}))
+	if credentials.Token == "" {
+		credentials.ID, credentials.Token = user.Id, user.Token
+	}
 
-	return getUserFromData(rawResponse.(map[string]interface{})), err
-}
-
-// Auth a user. Using an authentication token to login.
-//
-// https://rocket.chat/docs/developer-guides/realtime-api/method-calls/login/#using-an-authentication-token
-func (c *Client) Auth(token string) (*models.User, error) {
-	rawResponse, err := c.ddp.Call("login", ddpTokenLoginRequest{Token: token})
-
-	return getUserFromData(rawResponse.(map[string]interface{})), err
+	return user, nil
 }
 
 func getUserFromData(data interface{}) *models.User {
