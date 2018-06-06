@@ -27,9 +27,9 @@ type authInfo struct {
 }
 
 // The base for the most of the json responses
-type statusResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
+type StatusResponse struct {
+	Success bool   `json:"success"`
+	Channel string `json:"channel"`
 }
 
 func NewClient(host, port string, tls, debug bool) *Client {
