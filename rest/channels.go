@@ -52,7 +52,7 @@ func (c *Client) GetJoinedChannels() ([]models.Channel, error) {
 func (c *Client) JoinChannel(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "roomId": "%s" }`, channel.Id)
 	request, _ := http.NewRequest("POST", c.getUrl()+"/api/v1/channels.join", bytes.NewBufferString(body))
-	return c.doRequest(request, new(statusResponse))
+	return c.doRequest(request, new(channelsResponse))
 }
 
 // Leaves a channel. The id of the channel has to be not nil.
@@ -61,7 +61,7 @@ func (c *Client) JoinChannel(channel *models.Channel) error {
 func (c *Client) LeaveChannel(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.Id)
 	request, _ := http.NewRequest("POST", c.getUrl()+"/api/v1/channels.leave", bytes.NewBufferString(body))
-	return c.doRequest(request, new(statusResponse))
+	return c.doRequest(request, new(channelsResponse))
 }
 
 // Get information about a channel. That might be useful to update the usernames.

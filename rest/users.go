@@ -10,15 +10,15 @@ import (
 )
 
 type logoutResponse struct {
-	statusResponse
-	data struct {
-		message string `json:"message"`
+	Status string `json:"status"`
+	Data   struct {
+		Message string `json:"message"`
 	} `json:"data"`
 }
 
 type logonResponse struct {
-	statusResponse
-	Data struct {
+	Status string `json:"status"`
+	Data   struct {
 		Token  string `json:"authToken"`
 		UserId string `json:"userId"`
 	} `json:"data"`
@@ -74,7 +74,7 @@ func (c *Client) Logout() (string, error) {
 	}
 
 	if response.Status == "success" {
-		return response.data.message, nil
+		return response.Data.Message, nil
 	} else {
 		return "", errors.New("Response status: " + response.Status)
 	}

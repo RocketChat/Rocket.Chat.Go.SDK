@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html"
 	"net/http"
@@ -9,16 +10,14 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
-type messagesResponse struct {
-	statusResponse
-	ChannelName string           `json:"channel"`
-	Messages    []models.Message `json:"messages"`
+type MessagesResponse struct {
+	StatusResponse
+	Messages []models.Message `json:"messages"`
 }
 
-type messageResponse struct {
-	statusResponse
-	ChannelName string         `json:"channel"`
-	Message     models.Message `json:"message"`
+type MessageResponse struct {
+	StatusResponse
+	Message models.Message `json:"message"`
 }
 
 type Page struct {
@@ -33,9 +32,29 @@ func (c *Client) Send(channel *models.Channel, msg string) error {
 	body := fmt.Sprintf(`{ "channel": "%s", "text": "%s"}`, channel.Name, html.EscapeString(msg))
 	request, _ := http.NewRequest("POST", c.getUrl()+"/api/v1/chat.postMessage", bytes.NewBufferString(body))
 
-	response := new(messageResponse)
+	response := new(MessageResponse)
 
 	return c.doRequest(request, response)
+}
+
+// PostMessage send a message to a channel. The channel or roomId has to be not nil.
+// The message will be json encode.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
+func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) {
+	body, err := json.Marshal(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	request, err := http.NewRequest("POST", c.getUrl()+"/api/v1/chat.postMessage", bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(MessageResponse)
+	err = c.doRequest(request, response)
+	return response, err
 }
 
 // Get messages from a channel. The channel id has to be not nil. Optionally a
@@ -50,7 +69,7 @@ func (c *Client) GetMessages(channel *models.Channel, page *Page) ([]models.Mess
 	}
 
 	request, _ := http.NewRequest("GET", u, nil)
-	response := new(messagesResponse)
+	response := new(MessagesResponse)
 
 	if err := c.doRequest(request, response); err != nil {
 		return nil, err
