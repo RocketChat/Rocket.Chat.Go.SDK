@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 type Client struct {
@@ -32,16 +33,20 @@ type StatusResponse struct {
 	Channel string `json:"channel"`
 }
 
-func NewClient(host, port string, tls, debug bool) *Client {
-	var protocol string
+func NewClient(serverUrl *url.URL, debug bool) *Client {
+	protocol := "http"
+	port := "80"
 
-	if tls {
+	if serverUrl.Scheme == "https" {
 		protocol = "https"
-	} else {
-		protocol = "http"
+		port = "443"
 	}
 
-	return &Client{Host: host, Port: port, Protocol: protocol, Debug: debug}
+	if len(serverUrl.Port()) > 0 {
+		port = serverUrl.Port()
+	}
+
+	return &Client{Host: serverUrl.Hostname(), Port: port, Protocol: protocol, Debug: debug}
 }
 
 func (c *Client) getUrl() string {
