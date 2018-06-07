@@ -3,6 +3,7 @@ package realtime
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"strconv"
 
 	"github.com/Jeffail/gabs"
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
@@ -46,25 +47,48 @@ func (c *Client) RegisterUser(credentials *models.UserCredentials) (*models.User
 	return user, nil
 }
 
-// Login a user. The password and the email are not allowed to be nil.
+// Login a user.
+// token shouldn't be nil, otherwise the password and the email are not allowed to be nil.
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/login/
 func (c *Client) Login(credentials *models.UserCredentials) (*models.User, error) {
+	var request interface{}
+	if credentials.Token != "" {
+		request = ddpTokenLoginRequest{
+			Token: credentials.Token,
+		}
+	} else {
+		digest := sha256.Sum256([]byte(credentials.Password))
+		request = ddpLoginRequest{
+			User: ddpUser{Email: credentials.Email},
+			Password: ddpPassword{
+				Digest:    hex.EncodeToString(digest[:]),
+				Algorithm: "sha-256",
+			},
+		}
+	}
 
-	digest := sha256.Sum256([]byte(credentials.Password))
+	rawResponse, err := c.ddp.Call("login", request)
+	if err != nil {
+		return nil, err
+	}
 
-	rawResponse, err := c.ddp.Call("login", ddpLoginRequest{
-		User:     ddpUser{Email: credentials.Email},
-		Password: ddpPassword{Digest: hex.EncodeToString(digest[:]), Algorithm: "sha-256"}})
+	user := getUserFromData(rawResponse.(map[string]interface{}))
+	if credentials.Token == "" {
+		credentials.ID, credentials.Token = user.Id, user.Token
+	}
 
-	return getUserFromData(rawResponse.(map[string]interface{})), err
+	return user, nil
 }
 
 func getUserFromData(data interface{}) *models.User {
 	document, _ := gabs.Consume(data)
 
+	expires, _ := strconv.ParseFloat(stringOrZero(document.Path("tokenExpires.$date").Data()), 64)
 	return &models.User{
-		Id: stringOrZero(document.Path("id").Data()),
+		Id:           stringOrZero(document.Path("id").Data()),
+		Token:        stringOrZero(document.Path("token").Data()),
+		TokenExpires: int64(expires),
 	}
 }
 
