@@ -52,7 +52,7 @@ type Attachment struct {
 //
 // https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage/
 type AttachmentField struct {
-	Short bool `json:"short"`
-	Title bool `json:"title"`
-	Value bool `json:"value"`
+	Short bool   `json:"short"`
+	Title string `json:"title"`
+	Value string `json:"value"`
 }
