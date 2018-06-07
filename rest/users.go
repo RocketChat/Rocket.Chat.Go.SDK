@@ -10,15 +10,15 @@ import (
 )
 
 type logoutResponse struct {
-	statusResponse
-	data struct {
-		message string `json:"message"`
+	Status string `json:"status"`
+	Data   struct {
+		Message string `json:"message"`
 	} `json:"data"`
 }
 
 type logonResponse struct {
-	statusResponse
-	Data struct {
+	Status string `json:"status"`
+	Data   struct {
 		Token  string `json:"authToken"`
 		UserId string `json:"userId"`
 	} `json:"data"`
@@ -27,7 +27,16 @@ type logonResponse struct {
 // Login a user. The Email and the Password are mandatory. The auth token of the user is stored in the Client instance.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/authentication/login
-func (c *Client) Login(credentials models.UserCredentials) error {
+func (c *Client) Login(credentials *models.UserCredentials) error {
+	if c.auth != nil {
+		return nil
+	}
+
+	if credentials.ID != "" && credentials.Token != "" {
+		c.auth = &authInfo{id: credentials.ID, token: credentials.Token}
+		return nil
+	}
+
 	data := url.Values{"user": {credentials.Email}, "password": {credentials.Password}}
 	request, _ := http.NewRequest("POST", c.getUrl()+"/api/v1/login", bytes.NewBufferString(data.Encode()))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -40,6 +49,7 @@ func (c *Client) Login(credentials models.UserCredentials) error {
 
 	if response.Status == "success" {
 		c.auth = &authInfo{id: response.Data.UserId, token: response.Data.Token}
+		credentials.ID, credentials.Token = response.Data.UserId, response.Data.Token
 		return nil
 	} else {
 		return errors.New("Response status: " + response.Status)
@@ -64,7 +74,7 @@ func (c *Client) Logout() (string, error) {
 	}
 
 	if response.Status == "success" {
-		return response.data.message, nil
+		return response.Data.Message, nil
 	} else {
 		return "", errors.New("Response status: " + response.Status)
 	}
