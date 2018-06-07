@@ -2,6 +2,7 @@ package rest
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,8 +63,12 @@ func TestRocket_GetChannelInfo(t *testing.T) {
 
 	assert.Equal(t, general.Id, updatedChannelInfo.Id)
 	assert.NotEmpty(t, updatedChannelInfo.Name)
-	assert.NotEmpty(t, updatedChannelInfo.T)
+	assert.NotEmpty(t, updatedChannelInfo.Type)
 	assert.NotEmpty(t, updatedChannelInfo.UpdatedAt)
 	assert.NotEmpty(t, updatedChannelInfo.Timestamp)
-	assert.NotZero(t, len(updatedChannelInfo.UserNames))
+	// API has changed
+	// Please use the `channel/dm/group.members` endpoint. This is disabled for performance reasons
+	// https://github.com/RocketChat/Rocket.Chat/blob/develop/packages/rocketchat-api/server/v1/channels.js#L424
+	// https://github.com/RocketChat/Rocket.Chat/blob/develop/packages/rocketchat-api/server/api.js#L15
+	// assert.NotZero(t, len(updatedChannelInfo.UserNames))
 }
