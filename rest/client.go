@@ -11,6 +11,10 @@ import (
 	"net/url"
 )
 
+var (
+	ResponseErr = fmt.Errorf("got false response")
+)
+
 type Client struct {
 	Protocol string
 	Host     string
@@ -22,14 +26,22 @@ type Client struct {
 	auth *authInfo
 }
 
+type Status struct {
+	Success bool `json:"success"`
+}
+
 type authInfo struct {
 	token string
 	id    string
 }
 
+func (s Status) OK() bool {
+	return s.Success
+}
+
 // The base for the most of the json responses
 type StatusResponse struct {
-	Success bool   `json:"success"`
+	Status
 	Channel string `json:"channel"`
 }
 
