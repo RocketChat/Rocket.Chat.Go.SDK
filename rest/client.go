@@ -27,7 +27,10 @@ type Client struct {
 }
 
 type Status struct {
-	Success bool `json:"success"`
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }
 
 type authInfo struct {
@@ -35,8 +38,19 @@ type authInfo struct {
 	id    string
 }
 
-func (s Status) OK() bool {
-	return s.Success
+func (s Status) OK() error {
+	if s.Success {
+		return nil
+	}
+
+	if len(s.Error) > 0 {
+		return fmt.Errorf(s.Error)
+	}
+
+	if len(s.Message) > 0 {
+		return fmt.Errorf("status: %s, message: %s", s.Status, s.Message)
+	}
+	return ResponseErr
 }
 
 // The base for the most of the json responses
@@ -67,6 +81,7 @@ func (c *Client) getUrl() string {
 
 func (c *Client) doRequest(request *http.Request, responseBody interface{}) error {
 
+	request.Header.Set("Content-Type", "application/json")
 	if c.auth != nil {
 		request.Header.Set("X-Auth-Token", c.auth.token)
 		request.Header.Set("X-User-Id", c.auth.id)

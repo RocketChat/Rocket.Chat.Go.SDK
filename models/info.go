@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type Info struct {
 	Version string `json:"version"`
 
@@ -18,4 +20,21 @@ type Info struct {
 		Tag     string `json:"tag"`
 		Branch  string `json:"branch"`
 	} `json:"commit"`
+}
+
+type Directory struct {
+	Result []struct {
+		ID        string    `json:"_id"`
+		CreatedAt time.Time `json:"createdAt"`
+		Emails    []struct {
+			Address  string `json:"address"`
+			Verified bool   `json:"verified"`
+		} `json:"emails"`
+		Name     string `json:"name"`
+		Username string `json:"username"`
+	} `json:"result"`
+
+	Count  int `json:"count"`
+	Offset int `json:"offset"`
+	Total  int `json:"total"`
 }
