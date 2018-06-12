@@ -2,6 +2,7 @@ package rest
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
@@ -27,9 +28,40 @@ func (c *Client) GetServerInfo() (*models.Info, error) {
 		return nil, err
 	}
 
-	if !response.OK() {
-		return nil, ResponseErr
+	if err = response.OK(); err != nil {
+		return nil, err
 	}
 
 	return &response.Info, nil
+}
+
+type DirectoryResponse struct {
+	Status
+	models.Directory
+}
+
+// GetDirectory
+// A method, that searches by users or channels on all users and channels available on server.
+// It supports the Offset, Count, and Sort Query Parameters along with Query and Fields Query Parameters.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/directory
+func (c *Client) GetDirectory(params url.Values) (*models.Directory, error) {
+	request, err := http.NewRequest("GET", c.getUrl()+"/api/v1/directory", nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(params) > 0 {
+		request.URL.RawQuery = params.Encode()
+	}
+
+	response := new(DirectoryResponse)
+	if err = c.doRequest(request, response); err != nil {
+		return nil, err
+	}
+
+	if err = response.OK(); err != nil {
+		return nil, err
+	}
+
+	return &response.Directory, nil
 }
