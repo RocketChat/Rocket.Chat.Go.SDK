@@ -29,10 +29,23 @@ func TestRocket_GetDirectory(t *testing.T) {
 
 func TestRocket_GetSpotlight(t *testing.T) {
 	rocket := getDefaultClient(t)
-	rocket.Debug = true
 
 	spotlight, err := rocket.GetSpotlight(url.Values{"query": []string{`#foobar`}})
 
 	assert.Nil(t, err)
 	assert.NotNil(t, spotlight)
+}
+
+func TestRocket_GetStatistics(t *testing.T) {
+	rocket := getDefaultClient(t)
+
+	_, err := rocket.GetStatistics()
+	assert.NotNil(t, err)
+
+	// TODO admin user
+	rocket.auth.id = "4SicoW2wDjcAaRh4M"
+	rocket.auth.token = "4nI24JkcHTsqTtOUeJYbbrhum5T_Y6IdjAwyj72qDBu"
+	statistics, err := rocket.GetStatistics()
+	assert.Nil(t, err)
+	assert.NotNil(t, statistics)
 }
