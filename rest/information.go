@@ -123,3 +123,34 @@ func (c *Client) GetStatistics() (*models.StatisticsInfo, error) {
 
 	return &response.StatisticsInfo, nil
 }
+
+type StatisticsListResponse struct {
+	Status
+	models.StatisticsList
+}
+
+// GetStatisticsList
+// Selectable statistics about the Rocket.Chat server.
+// It supports the Offset, Count and Sort Query Parameters along with just the Fields and Query Parameters.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/statistics.list
+func (c *Client) GetStatisticsList(params url.Values) (*models.StatisticsList, error) {
+	request, err := http.NewRequest("GET", c.getUrl()+"/api/v1/statistics.list", nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(params) > 0 {
+		request.URL.RawQuery = params.Encode()
+	}
+
+	response := new(StatisticsListResponse)
+	if err = c.doRequest(request, response); err != nil {
+		return nil, err
+	}
+
+	if err = response.OK(); err != nil {
+		return nil, err
+	}
+
+	return &response.StatisticsList, nil
+}
