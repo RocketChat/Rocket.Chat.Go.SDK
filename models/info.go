@@ -38,3 +38,8 @@ type Directory struct {
 	Offset int `json:"offset"`
 	Total  int `json:"total"`
 }
+
+type Spotlight struct {
+	Users []User    `json:"users"`
+	Rooms []Channel `json:"rooms"`
+}
