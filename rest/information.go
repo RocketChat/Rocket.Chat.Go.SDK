@@ -96,3 +96,30 @@ func (c *Client) GetSpotlight(params url.Values) (*models.Spotlight, error) {
 
 	return &response.Spotlight, nil
 }
+
+type StatisticsResponse struct {
+	Status
+	models.StatisticsInfo
+}
+
+// GetStatistics
+// Statistics about the Rocket.Chat server.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/statistics
+func (c *Client) GetStatistics() (*models.StatisticsInfo, error) {
+	request, err := http.NewRequest("GET", c.getUrl()+"/api/v1/statistics", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(StatisticsResponse)
+	if err = c.doRequest(request, response); err != nil {
+		return nil, err
+	}
+
+	if err = response.OK(); err != nil {
+		return nil, err
+	}
+
+	return &response.StatisticsInfo, nil
+}
