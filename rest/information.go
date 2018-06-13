@@ -65,3 +65,34 @@ func (c *Client) GetDirectory(params url.Values) (*models.Directory, error) {
 
 	return &response.Directory, nil
 }
+
+type SpotlightResponse struct {
+	Status
+	models.Spotlight
+}
+
+// GetSpotlight
+// Searches for users or rooms that are visible to the user.
+// WARNING: It will only return rooms that user didn’t join yet.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/spotlight
+func (c *Client) GetSpotlight(params url.Values) (*models.Spotlight, error) {
+	request, err := http.NewRequest("GET", c.getUrl()+"/api/v1/spotlight", nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(params) > 0 {
+		request.URL.RawQuery = params.Encode()
+	}
+
+	response := new(SpotlightResponse)
+	if err = c.doRequest(request, response); err != nil {
+		return nil, err
+	}
+
+	if err = response.OK(); err != nil {
+		return nil, err
+	}
+
+	return &response.Spotlight, nil
+}

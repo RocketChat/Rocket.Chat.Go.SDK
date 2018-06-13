@@ -21,8 +21,18 @@ func TestRocket_GetServerInfo(t *testing.T) {
 func TestRocket_GetDirectory(t *testing.T) {
 	rocket := getDefaultClient(t)
 
-	directory, err := rocket.GetDirectory(url.Values{"query": []string{`{"text":"rokcet"}`}})
+	directory, err := rocket.GetDirectory(url.Values{"query": []string{`{"text": "gene", "type": "channels"}`}})
 
 	assert.Nil(t, err)
 	assert.NotNil(t, directory)
+}
+
+func TestRocket_GetSpotlight(t *testing.T) {
+	rocket := getDefaultClient(t)
+	rocket.Debug = true
+
+	spotlight, err := rocket.GetSpotlight(url.Values{"query": []string{`#foobar`}})
+
+	assert.Nil(t, err)
+	assert.NotNil(t, spotlight)
 }
