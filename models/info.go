@@ -22,6 +22,12 @@ type Info struct {
 	} `json:"commit"`
 }
 
+type PaginationResult struct {
+	Count  int `json:"count"`
+	Offset int `json:"offset"`
+	Total  int `json:"total"`
+}
+
 type Directory struct {
 	Result []struct {
 		ID        string    `json:"_id"`
@@ -34,9 +40,7 @@ type Directory struct {
 		Username string `json:"username"`
 	} `json:"result"`
 
-	Count  int `json:"count"`
-	Offset int `json:"offset"`
-	Total  int `json:"total"`
+	PaginationResult
 }
 
 type Spotlight struct {
@@ -125,7 +129,5 @@ type StatisticsInfo struct {
 type StatisticsList struct {
 	Statistics []Statistics `json:"statistics"`
 
-	Count  int `json:"count"`
-	Offset int `json:"offset"`
-	Total  int `json:"total"`
+	PaginationResult
 }

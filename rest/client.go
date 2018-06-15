@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,10 +16,15 @@ var (
 	ResponseErr = fmt.Errorf("got false response")
 )
 
+type Response interface {
+	OK() error
+}
+
 type Client struct {
 	Protocol string
 	Host     string
 	Port     string
+	Version  string
 
 	// Use this switch to see all network communication.
 	Debug bool
@@ -72,14 +78,30 @@ func NewClient(serverUrl *url.URL, debug bool) *Client {
 		port = serverUrl.Port()
 	}
 
-	return &Client{Host: serverUrl.Hostname(), Port: port, Protocol: protocol, Debug: debug}
+	return &Client{Host: serverUrl.Hostname(), Port: port, Protocol: protocol, Version: "v1", Debug: debug}
 }
 
 func (c *Client) getUrl() string {
-	return fmt.Sprintf("%v://%v:%v", c.Protocol, c.Host, c.Port)
+	return fmt.Sprintf("%v://%v:%v/api/%s", c.Protocol, c.Host, c.Port, c.Version)
 }
 
-func (c *Client) doRequest(request *http.Request, responseBody interface{}) error {
+func (c *Client) Get(api string, params url.Values, response Response) error {
+	return c.doRequest(http.MethodGet, api, params, nil, response)
+}
+
+func (c *Client) Post(api string, body io.Reader, response Response) error {
+	return c.doRequest(http.MethodPost, api, nil, body, response)
+}
+
+func (c *Client) doRequest(method, api string, params url.Values, body io.Reader, response Response) error {
+	request, err := http.NewRequest(method, c.getUrl()+"/"+api, body)
+	if err != nil {
+		return err
+	}
+
+	if len(params) > 0 {
+		request.URL.RawQuery = params.Encode()
+	}
 
 	request.Header.Set("Content-Type", "application/json")
 	if c.auth != nil {
@@ -91,26 +113,30 @@ func (c *Client) doRequest(request *http.Request, responseBody interface{}) erro
 		log.Println(request)
 	}
 
-	response, err := http.DefaultClient.Do(request)
+	resp, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		return err
 	}
 
-	defer response.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
 
 	if c.Debug {
 		log.Println(string(bodyBytes))
 	}
 
-	if response.StatusCode != http.StatusOK {
-		return errors.New("Request error: " + response.Status)
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("Request error: " + resp.Status)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	return json.Unmarshal(bodyBytes, responseBody)
+	if err = json.Unmarshal(bodyBytes, response); err != nil {
+		return err
+	}
+
+	return response.OK()
 }
