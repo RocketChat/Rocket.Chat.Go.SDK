@@ -5,23 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 type MessagesResponse struct {
-	StatusResponse
+	Status
 	Messages []models.Message `json:"messages"`
 }
 
 type MessageResponse struct {
-	StatusResponse
+	Status
 	Message models.Message `json:"message"`
-}
-
-type Page struct {
-	Count int
 }
 
 // Sends a message to a channel. The name of the channel has to be not nil.
@@ -30,11 +27,7 @@ type Page struct {
 // https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
 func (c *Client) Send(channel *models.Channel, msg string) error {
 	body := fmt.Sprintf(`{ "channel": "%s", "text": "%s"}`, channel.Name, html.EscapeString(msg))
-	request, _ := http.NewRequest("POST", c.getUrl()+"/api/v1/chat.postMessage", bytes.NewBufferString(body))
-
-	response := new(MessageResponse)
-
-	return c.doRequest(request, response)
+	return c.Post("chat.postMessage", bytes.NewBufferString(body), new(MessageResponse))
 }
 
 // PostMessage send a message to a channel. The channel or roomId has to be not nil.
@@ -47,13 +40,8 @@ func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) 
 		return nil, err
 	}
 
-	request, err := http.NewRequest("POST", c.getUrl()+"/api/v1/chat.postMessage", bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
-	}
-
 	response := new(MessageResponse)
-	err = c.doRequest(request, response)
+	err = c.Post("chat.postMessage", bytes.NewBuffer(body), response)
 	return response, err
 }
 
@@ -61,17 +49,17 @@ func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) 
 // count can be specified to limit the size of the returned messages.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/history
-func (c *Client) GetMessages(channel *models.Channel, page *Page) ([]models.Message, error) {
-	u := fmt.Sprintf("%s/api/v1/channels.history?roomId=%s", c.getUrl(), channel.Id)
-
-	if page != nil {
-		u = fmt.Sprintf("%s&count=%d", u, page.Count)
+func (c *Client) GetMessages(channel *models.Channel, page *models.Pagination) ([]models.Message, error) {
+	params := url.Values{
+		"roomId": []string{channel.ID},
 	}
 
-	request, _ := http.NewRequest("GET", u, nil)
-	response := new(MessagesResponse)
+	if page != nil {
+		params.Add("count", strconv.Itoa(page.Count))
+	}
 
-	if err := c.doRequest(request, response); err != nil {
+	response := new(MessagesResponse)
+	if err := c.Get("channels.history", params, response); err != nil {
 		return nil, err
 	}
 

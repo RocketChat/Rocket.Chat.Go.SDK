@@ -22,7 +22,7 @@ type Info struct {
 	} `json:"commit"`
 }
 
-type PaginationResult struct {
+type Pagination struct {
 	Count  int `json:"count"`
 	Offset int `json:"offset"`
 	Total  int `json:"total"`
@@ -40,7 +40,7 @@ type Directory struct {
 		Username string `json:"username"`
 	} `json:"result"`
 
-	PaginationResult
+	Pagination
 }
 
 type Spotlight struct {
@@ -129,5 +129,5 @@ type StatisticsInfo struct {
 type StatisticsList struct {
 	Statistics []Statistics `json:"statistics"`
 
-	PaginationResult
+	Pagination
 }
