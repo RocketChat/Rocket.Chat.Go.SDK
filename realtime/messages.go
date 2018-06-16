@@ -3,6 +3,7 @@ package realtime
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/Jeffail/gabs"
@@ -197,7 +198,8 @@ func getMessageFromDocument(arg *gabs.Container) *models.Message {
 	var ts *time.Time
 	date := stringOrZero(arg.Path("ts.$date").Data())
 	if len(date) > 0 {
-		if t, err := time.Parse(time.RFC3339, date); err == nil {
+		if ti, err := strconv.ParseFloat(date, 64); err == nil {
+			t := time.Unix(int64(ti)/1e3, int64(ti)%1e3)
 			ts = &t
 		}
 	}
