@@ -154,15 +154,20 @@ func (c *Client) doRequest(method, api string, params url.Values, body io.Reader
 		log.Println(string(bodyBytes))
 	}
 
+	var parse bool
+	if err == nil {
+		if e := json.Unmarshal(bodyBytes, response); e == nil {
+			parse = true
+		}
+	}
 	if resp.StatusCode != http.StatusOK {
+		if parse {
+			return response.OK()
+		}
 		return errors.New("Request error: " + resp.Status)
 	}
 
 	if err != nil {
-		return err
-	}
-
-	if err = json.Unmarshal(bodyBytes, response); err != nil {
 		return err
 	}
 

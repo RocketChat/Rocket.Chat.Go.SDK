@@ -10,7 +10,7 @@ import (
 
 type ChannelsResponse struct {
 	Status
-	models.PaginationResult
+	models.Pagination
 	Channels []models.Channel `json:"channels"`
 }
 
