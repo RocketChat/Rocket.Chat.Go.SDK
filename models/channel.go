@@ -6,15 +6,15 @@ type Channel struct {
 	ID    string `json:"_id"`
 	Name  string `json:"name"`
 	Fname string `json:"fname,omitempty"`
-	T     string `json:"t"`
+	Type  string `json:"t"`
 	Msgs  int    `json:"msgs"`
 
-	Ro        bool `json:"ro,omitempty"`
+	ReadOnly  bool `json:"ro,omitempty"`
 	SysMes    bool `json:"sysMes,omitempty"`
 	Default   bool `json:"default"`
 	Broadcast bool `json:"broadcast,omitempty"`
 
-	Ts        *time.Time `json:"ts,omitempty"`
+	Timestamp *time.Time `json:"ts,omitempty"`
 	UpdatedAt *time.Time `json:"_updatedAt,omitempty"`
 
 	User        *User    `json:"u,omitempty"`
@@ -26,7 +26,7 @@ type Channel struct {
 }
 
 type ChannelSubscription struct {
-	Id          string   `json:"_id"`
+	ID          string   `json:"_id"`
 	Alert       bool     `json:"alert"`
 	Name        string   `json:"name"`
 	DisplayName string   `json:"fname"`

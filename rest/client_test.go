@@ -44,9 +44,11 @@ func getAuthenticatedClient(t *testing.T, name, email, password string) *Client 
 }
 
 func findMessage(messages []models.Message, user string, msg string) *models.Message {
-	for _, m := range messages {
-		if m.U.UserName == user && m.Msg == msg {
-			return &m
+	var m *models.Message
+	for i := range messages {
+		m = &messages[i]
+		if m.User.UserName == user && m.Msg == msg {
+			return m
 		}
 	}
 

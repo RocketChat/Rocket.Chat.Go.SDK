@@ -36,10 +36,10 @@ func TestClient_SubscribeToMessageStream(t *testing.T) {
 
 func assertMessage(t *testing.T, message models.Message) {
 	assert.NotNil(t, message.ID, "Id was not set")
-	assert.Equal(t, "GENERAL", message.Rid, "Wrong channel id")
-	assert.NotNil(t, message.Ts, "Timestamp was not set")
-	assert.NotNil(t, message.U.Id, "UserId was not set")
-	assert.NotNil(t, message.U.UserName, "Username was not set")
+	assert.Equal(t, "GENERAL", message.RoomID, "Wrong channel id")
+	assert.NotNil(t, message.Timestamp, "Timestamp was not set")
+	assert.NotNil(t, message.User.ID, "UserId was not set")
+	assert.NotNil(t, message.User.UserName, "Username was not set")
 }
 
 func sendAndAssertNoError(t *testing.T, c *Client, channel *models.Channel, text string) {

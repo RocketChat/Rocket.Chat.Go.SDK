@@ -4,19 +4,19 @@ import "time"
 
 type Message struct {
 	ID       string `json:"_id"`
-	Rid      string `json:"rid"`
+	RoomID   string `json:"rid"`
 	Msg      string `json:"msg"`
 	EditedBy string `json:"editedBy,omitempty"`
 
 	ParseUrls bool `json:"parseUrls,omitempty"`
 	Groupable bool `json:"groupable,omitempty"`
 
-	EditedAt  time.Time  `json:"editedAt,omitempty"`
-	Ts        *time.Time `json:"ts,omitempty"`
+	EditedAt  *time.Time `json:"editedAt,omitempty"`
+	Timestamp *time.Time `json:"ts,omitempty"`
 	UpdatedAt *time.Time `json:"_updatedAt,omitempty"`
 
 	Mentions []User `json:"mentions,omitempty"`
-	U        *User  `json:"u,omitempty"`
+	User     *User  `json:"u,omitempty"`
 	PostMessage
 
 	// Bot         interface{}  `json:"bot"`
@@ -44,7 +44,7 @@ type PostMessage struct {
 type Attachment struct {
 	Color       string `json:"color,omitempty"`
 	Text        string `json:"text,omitempty"`
-	Ts          string `json:"ts,omitempty"`
+	Timestamp   string `json:"ts,omitempty"`
 	ThumbURL    string `json:"thumb_url,omitempty"`
 	MessageLink string `json:"message_link,omitempty"`
 	Collapsed   bool   `json:"collapsed"`
