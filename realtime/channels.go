@@ -38,10 +38,10 @@ func (c *Client) GetChannelsIn() ([]models.Channel, error) {
 
 	for _, i := range chans {
 		channels = append(channels, models.Channel{
-			Id: stringOrZero(i.Path("_id").Data()),
+			ID: stringOrZero(i.Path("_id").Data()),
 			//Default: stringOrZero(i.Path("default").Data()),
 			Name: stringOrZero(i.Path("name").Data()),
-			Type: stringOrZero(i.Path("t").Data()),
+			T:    stringOrZero(i.Path("t").Data()),
 		})
 	}
 
