@@ -2,6 +2,7 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,6 +36,7 @@ type Client struct {
 type Status struct {
 	Success bool   `json:"success"`
 	Error   string `json:"error"`
+
 	Status  string `json:"status"`
 	Message string `json:"message"`
 }
@@ -51,6 +53,10 @@ func (s Status) OK() error {
 
 	if len(s.Error) > 0 {
 		return fmt.Errorf(s.Error)
+	}
+
+	if s.Status == "success" {
+		return nil
 	}
 
 	if len(s.Message) > 0 {
@@ -82,28 +88,50 @@ func NewClient(serverUrl *url.URL, debug bool) *Client {
 }
 
 func (c *Client) getUrl() string {
+	if len(c.Version) == 0 {
+		c.Version = "v1"
+	}
 	return fmt.Sprintf("%v://%v:%v/api/%s", c.Protocol, c.Host, c.Port, c.Version)
 }
 
+// Get call Get
 func (c *Client) Get(api string, params url.Values, response Response) error {
 	return c.doRequest(http.MethodGet, api, params, nil, response)
 }
 
+// Post call as JSON
 func (c *Client) Post(api string, body io.Reader, response Response) error {
 	return c.doRequest(http.MethodPost, api, nil, body, response)
 }
 
+// PostForm call as Form Data
+func (c *Client) PostForm(api string, params url.Values, response Response) error {
+	return c.doRequest(http.MethodPost, api, params, nil, response)
+}
+
 func (c *Client) doRequest(method, api string, params url.Values, body io.Reader, response Response) error {
+	contentType := "application/x-www-form-urlencoded"
+	if method == http.MethodPost {
+		if body != nil {
+			contentType = "application/json"
+		} else if len(params) > 0 {
+			body = bytes.NewBufferString(params.Encode())
+		}
+	}
+
 	request, err := http.NewRequest(method, c.getUrl()+"/"+api, body)
 	if err != nil {
 		return err
 	}
 
-	if len(params) > 0 {
-		request.URL.RawQuery = params.Encode()
+	if method == http.MethodGet {
+		if len(params) > 0 {
+			request.URL.RawQuery = params.Encode()
+		}
+	} else {
+		request.Header.Set("Content-Type", contentType)
 	}
 
-	request.Header.Set("Content-Type", "application/json")
 	if c.auth != nil {
 		request.Header.Set("X-Auth-Token", c.auth.token)
 		request.Header.Set("X-User-Id", c.auth.id)
