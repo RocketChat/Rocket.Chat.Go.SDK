@@ -37,14 +37,10 @@ func TestRocket_GetSpotlight(t *testing.T) {
 }
 
 func TestRocket_GetStatistics(t *testing.T) {
-	rocket := getDefaultClient(t)
-
-	_, err := rocket.GetStatistics()
-	assert.NotNil(t, err)
-
+	rocket := Client{Protocol: common_testing.Protocol, Host: common_testing.Host, Port: common_testing.Port}
 	// TODO admin user
-	rocket.auth.id = "4SicoW2wDjcAaRh4M"
-	rocket.auth.token = "4nI24JkcHTsqTtOUeJYbbrhum5T_Y6IdjAwyj72qDBu"
+	rocket.auth = &authInfo{id: "4SicoW2wDjcAaRh4M", token: "4nI24JkcHTsqTtOUeJYbbrhum5T_Y6IdjAwyj72qDBu"}
+
 	statistics, err := rocket.GetStatistics()
 	assert.Nil(t, err)
 	assert.NotNil(t, statistics)
