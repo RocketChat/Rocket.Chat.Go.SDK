@@ -1,11 +1,28 @@
 package models
 
+import "time"
+
 type Message struct {
-	Id        string `json:"_id"`
-	ChannelId string `json:"rid"`
-	Text      string `json:"msg"`
-	Timestamp string `json:"ts"`
-	User      User   `json:"u"`
+	ID       string `json:"_id"`
+	Rid      string `json:"rid"`
+	Msg      string `json:"msg"`
+	EditedBy string `json:"editedBy,omitempty"`
+
+	ParseUrls bool `json:"parseUrls,omitempty"`
+	Groupable bool `json:"groupable,omitempty"`
+
+	EditedAt  time.Time  `json:"editedAt,omitempty"`
+	Ts        *time.Time `json:"ts,omitempty"`
+	UpdatedAt *time.Time `json:"_updatedAt,omitempty"`
+
+	Mentions []User `json:"mentions,omitempty"`
+	U        *User  `json:"u,omitempty"`
+	PostMessage
+
+	// Bot         interface{}  `json:"bot"`
+	// CustomFields interface{} `json:"customFields"`
+	// Channels           []interface{} `json:"channels"`
+	// SandstormSessionID interface{} `json:"sandstormSessionId"`
 }
 
 // PostMessage Payload for postmessage rest API
