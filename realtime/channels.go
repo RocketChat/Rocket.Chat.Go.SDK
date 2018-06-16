@@ -41,7 +41,7 @@ func (c *Client) GetChannelsIn() ([]models.Channel, error) {
 			ID: stringOrZero(i.Path("_id").Data()),
 			//Default: stringOrZero(i.Path("default").Data()),
 			Name: stringOrZero(i.Path("name").Data()),
-			T:    stringOrZero(i.Path("t").Data()),
+			Type: stringOrZero(i.Path("t").Data()),
 		})
 	}
 
@@ -68,14 +68,14 @@ func (c *Client) GetChannelSubscriptions() ([]models.ChannelSubscription, error)
 
 	for _, sub := range channelSubs {
 		channelSubscription := models.ChannelSubscription{
-			Id:          stringOrZero(sub.Path("_id").Data()),
+			ID:          stringOrZero(sub.Path("_id").Data()),
 			Alert:       sub.Path("alert").Data().(bool),
 			Name:        stringOrZero(sub.Path("name").Data()),
 			DisplayName: stringOrZero(sub.Path("fname").Data()),
 			Open:        sub.Path("open").Data().(bool),
 			Type:        stringOrZero(sub.Path("t").Data()),
 			User: models.User{
-				Id:       stringOrZero(sub.Path("u._id").Data()),
+				ID:       stringOrZero(sub.Path("u._id").Data()),
 				UserName: stringOrZero(sub.Path("u.username").Data()),
 			},
 			Unread: sub.Path("unread").Data().(float64),

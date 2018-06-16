@@ -75,7 +75,7 @@ func (c *Client) Login(credentials *models.UserCredentials) (*models.User, error
 
 	user := getUserFromData(rawResponse.(map[string]interface{}))
 	if credentials.Token == "" {
-		credentials.ID, credentials.Token = user.Id, user.Token
+		credentials.ID, credentials.Token = user.ID, user.Token
 	}
 
 	return user, nil
@@ -86,7 +86,7 @@ func getUserFromData(data interface{}) *models.User {
 
 	expires, _ := strconv.ParseFloat(stringOrZero(document.Path("tokenExpires.$date").Data()), 64)
 	return &models.User{
-		Id:           stringOrZero(document.Path("id").Data()),
+		ID:           stringOrZero(document.Path("id").Data()),
 		Token:        stringOrZero(document.Path("token").Data()),
 		TokenExpires: int64(expires),
 	}

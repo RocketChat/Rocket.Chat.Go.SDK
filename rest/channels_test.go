@@ -41,7 +41,7 @@ func TestRocket_GetChannelInfo(t *testing.T) {
 
 	assert.Equal(t, general.ID, updatedChannelInfo.ID)
 	assert.NotEmpty(t, updatedChannelInfo.Name)
-	assert.NotEmpty(t, updatedChannelInfo.T)
+	assert.NotEmpty(t, updatedChannelInfo.Type)
 	assert.NotEmpty(t, updatedChannelInfo.UpdatedAt)
-	assert.NotEmpty(t, updatedChannelInfo.Ts)
+	assert.NotEmpty(t, updatedChannelInfo.Timestamp)
 }
