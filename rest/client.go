@@ -14,13 +14,16 @@ import (
 )
 
 var (
-	ResponseErr = fmt.Errorf("got false response")
+	// ErrResponse for general responice errors
+	ErrResponse = fmt.Errorf("got false response")
 )
 
+// Response is everythuing is ok ?
 type Response interface {
 	OK() error
 }
 
+// Client returned by NewClient
 type Client struct {
 	Protocol string
 	Host     string
@@ -33,6 +36,7 @@ type Client struct {
 	auth *authInfo
 }
 
+// Status ...
 type Status struct {
 	Success bool   `json:"success"`
 	Error   string `json:"error"`
@@ -46,6 +50,7 @@ type authInfo struct {
 	id    string
 }
 
+// OK ...
 func (s Status) OK() error {
 	if s.Success {
 		return nil
@@ -62,7 +67,7 @@ func (s Status) OK() error {
 	if len(s.Message) > 0 {
 		return fmt.Errorf("status: %s, message: %s", s.Status, s.Message)
 	}
-	return ResponseErr
+	return ErrResponse
 }
 
 // StatusResponse The base for the most of the json responses
@@ -71,23 +76,24 @@ type StatusResponse struct {
 	Channel string `json:"channel"`
 }
 
-func NewClient(serverUrl *url.URL, debug bool) *Client {
+// NewClient The base Rocketchat client
+func NewClient(serverURL *url.URL, debug bool) *Client {
 	protocol := "http"
 	port := "80"
 
-	if serverUrl.Scheme == "https" {
+	if serverURL.Scheme == "https" {
 		protocol = "https"
 		port = "443"
 	}
 
-	if len(serverUrl.Port()) > 0 {
-		port = serverUrl.Port()
+	if len(serverURL.Port()) > 0 {
+		port = serverURL.Port()
 	}
 
-	return &Client{Host: serverUrl.Hostname(), Port: port, Protocol: protocol, Version: "v1", Debug: debug}
+	return &Client{Host: serverURL.Hostname(), Port: port, Protocol: protocol, Version: "v1", Debug: debug}
 }
 
-func (c *Client) getUrl() string {
+func (c *Client) getURL() string {
 	if len(c.Version) == 0 {
 		c.Version = "v1"
 	}
@@ -119,7 +125,7 @@ func (c *Client) doRequest(method, api string, params url.Values, body io.Reader
 		}
 	}
 
-	request, err := http.NewRequest(method, c.getUrl()+"/"+api, body)
+	request, err := http.NewRequest(method, c.getURL()+"/"+api, body)
 	if err != nil {
 		return err
 	}

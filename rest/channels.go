@@ -8,12 +8,14 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
+// ChannelsResponse used when returning channel lists
 type ChannelsResponse struct {
 	Status
 	models.Pagination
 	Channels []models.Channel `json:"channels"`
 }
 
+// ChannelResponse on a single channel
 type ChannelResponse struct {
 	Status
 	Channel models.Channel `json:"channel"`

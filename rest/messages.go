@@ -11,17 +11,19 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
+// MessagesResponse hold messages
 type MessagesResponse struct {
 	Status
 	Messages []models.Message `json:"messages"`
 }
 
+// MessageResponse a message
 type MessageResponse struct {
 	Status
 	Message models.Message `json:"message"`
 }
 
-// Sends a message to a channel. The name of the channel has to be not nil.
+// Send a message to a channel. The name of the channel has to be not nil.
 // The message will be html escaped.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
@@ -45,7 +47,7 @@ func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) 
 	return response, err
 }
 
-// Get messages from a channel. The channel id has to be not nil. Optionally a
+// GetMessages from a channel. The channel id has to be not nil. Optionally a
 // count can be specified to limit the size of the returned messages.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/history
