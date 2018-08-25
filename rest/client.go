@@ -1,4 +1,4 @@
-// This package provides a RocketChat rest client.
+//Package rest provides a RocketChat rest client.
 package rest
 
 import (
@@ -65,7 +65,7 @@ func (s Status) OK() error {
 	return ResponseErr
 }
 
-// The base for the most of the json responses
+// StatusResponse The base for the most of the json responses
 type StatusResponse struct {
 	Status
 	Channel string `json:"channel"`
