@@ -18,7 +18,7 @@ type logonResponse struct {
 	Status
 	Data struct {
 		Token  string `json:"authToken"`
-		UserId string `json:"userId"`
+		UserID string `json:"userID"`
 	} `json:"data"`
 }
 
@@ -41,8 +41,8 @@ func (c *Client) Login(credentials *models.UserCredentials) error {
 		return err
 	}
 
-	c.auth = &authInfo{id: response.Data.UserId, token: response.Data.Token}
-	credentials.ID, credentials.Token = response.Data.UserId, response.Data.Token
+	c.auth = &authInfo{id: response.Data.UserID, token: response.Data.Token}
+	credentials.ID, credentials.Token = response.Data.UserID, response.Data.Token
 	return nil
 }
 
