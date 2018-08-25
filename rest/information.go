@@ -11,8 +11,7 @@ type InfoResponse struct {
 	Info models.Info `json:"info"`
 }
 
-// GetServerInfo
-// A simple method, requires no authentication,
+// GetServerInfo a simple method, requires no authentication,
 // that returns information about the server including version information.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/info
@@ -30,8 +29,7 @@ type DirectoryResponse struct {
 	models.Directory
 }
 
-// GetDirectory
-// A method, that searches by users or channels on all users and channels available on server.
+// GetDirectory a method, that searches by users or channels on all users and channels available on server.
 // It supports the Offset, Count, and Sort Query Parameters along with Query and Fields Query Parameters.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/directory
@@ -49,8 +47,7 @@ type SpotlightResponse struct {
 	models.Spotlight
 }
 
-// GetSpotlight
-// Searches for users or rooms that are visible to the user.
+// GetSpotlight searches for users or rooms that are visible to the user.
 // WARNING: It will only return rooms that user didn’t join yet.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/spotlight
