@@ -2,18 +2,30 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 )
+
+var (
+	ResponseErr = fmt.Errorf("got false response")
+)
+
+type Response interface {
+	OK() error
+}
 
 type Client struct {
 	Protocol string
 	Host     string
 	Port     string
+	Version  string
 
 	// Use this switch to see all network communication.
 	Debug bool
@@ -21,34 +33,104 @@ type Client struct {
 	auth *authInfo
 }
 
+type Status struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
+
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
 type authInfo struct {
 	token string
 	id    string
 }
 
-// The base for the most of the json responses
-type statusResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
-
-func NewClient(host, port string, tls, debug bool) *Client {
-	var protocol string
-
-	if tls {
-		protocol = "https"
-	} else {
-		protocol = "http"
+func (s Status) OK() error {
+	if s.Success {
+		return nil
 	}
 
-	return &Client{Host: host, Port: port, Protocol: protocol, Debug: debug}
+	if len(s.Error) > 0 {
+		return fmt.Errorf(s.Error)
+	}
+
+	if s.Status == "success" {
+		return nil
+	}
+
+	if len(s.Message) > 0 {
+		return fmt.Errorf("status: %s, message: %s", s.Status, s.Message)
+	}
+	return ResponseErr
+}
+
+// The base for the most of the json responses
+type StatusResponse struct {
+	Status
+	Channel string `json:"channel"`
+}
+
+func NewClient(serverUrl *url.URL, debug bool) *Client {
+	protocol := "http"
+	port := "80"
+
+	if serverUrl.Scheme == "https" {
+		protocol = "https"
+		port = "443"
+	}
+
+	if len(serverUrl.Port()) > 0 {
+		port = serverUrl.Port()
+	}
+
+	return &Client{Host: serverUrl.Hostname(), Port: port, Protocol: protocol, Version: "v1", Debug: debug}
 }
 
 func (c *Client) getUrl() string {
-	return fmt.Sprintf("%v://%v:%v", c.Protocol, c.Host, c.Port)
+	if len(c.Version) == 0 {
+		c.Version = "v1"
+	}
+	return fmt.Sprintf("%v://%v:%v/api/%s", c.Protocol, c.Host, c.Port, c.Version)
 }
 
-func (c *Client) doRequest(request *http.Request, responseBody interface{}) error {
+// Get call Get
+func (c *Client) Get(api string, params url.Values, response Response) error {
+	return c.doRequest(http.MethodGet, api, params, nil, response)
+}
+
+// Post call as JSON
+func (c *Client) Post(api string, body io.Reader, response Response) error {
+	return c.doRequest(http.MethodPost, api, nil, body, response)
+}
+
+// PostForm call as Form Data
+func (c *Client) PostForm(api string, params url.Values, response Response) error {
+	return c.doRequest(http.MethodPost, api, params, nil, response)
+}
+
+func (c *Client) doRequest(method, api string, params url.Values, body io.Reader, response Response) error {
+	contentType := "application/x-www-form-urlencoded"
+	if method == http.MethodPost {
+		if body != nil {
+			contentType = "application/json"
+		} else if len(params) > 0 {
+			body = bytes.NewBufferString(params.Encode())
+		}
+	}
+
+	request, err := http.NewRequest(method, c.getUrl()+"/"+api, body)
+	if err != nil {
+		return err
+	}
+
+	if method == http.MethodGet {
+		if len(params) > 0 {
+			request.URL.RawQuery = params.Encode()
+		}
+	} else {
+		request.Header.Set("Content-Type", contentType)
+	}
 
 	if c.auth != nil {
 		request.Header.Set("X-Auth-Token", c.auth.token)
@@ -59,26 +141,35 @@ func (c *Client) doRequest(request *http.Request, responseBody interface{}) erro
 		log.Println(request)
 	}
 
-	response, err := http.DefaultClient.Do(request)
+	resp, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		return err
 	}
 
-	defer response.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
 
 	if c.Debug {
 		log.Println(string(bodyBytes))
 	}
 
-	if response.StatusCode != http.StatusOK {
-		return errors.New("Request error: " + response.Status)
+	var parse bool
+	if err == nil {
+		if e := json.Unmarshal(bodyBytes, response); e == nil {
+			parse = true
+		}
+	}
+	if resp.StatusCode != http.StatusOK {
+		if parse {
+			return response.OK()
+		}
+		return errors.New("Request error: " + resp.Status)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	return json.Unmarshal(bodyBytes, responseBody)
+	return response.OK()
 }

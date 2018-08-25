@@ -2,22 +2,20 @@ package rest
 
 import (
 	"bytes"
-	"errors"
-	"net/http"
 	"net/url"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 type logoutResponse struct {
-	statusResponse
-	data struct {
-		message string `json:"message"`
+	Status
+	Data struct {
+		Message string `json:"message"`
 	} `json:"data"`
 }
 
 type logonResponse struct {
-	statusResponse
+	Status
 	Data struct {
 		Token  string `json:"authToken"`
 		UserId string `json:"userId"`
@@ -27,23 +25,25 @@ type logonResponse struct {
 // Login a user. The Email and the Password are mandatory. The auth token of the user is stored in the Client instance.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/authentication/login
-func (c *Client) Login(credentials models.UserCredentials) error {
-	data := url.Values{"user": {credentials.Email}, "password": {credentials.Password}}
-	request, _ := http.NewRequest("POST", c.getUrl()+"/api/v1/login", bytes.NewBufferString(data.Encode()))
-	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+func (c *Client) Login(credentials *models.UserCredentials) error {
+	if c.auth != nil {
+		return nil
+	}
+
+	if credentials.ID != "" && credentials.Token != "" {
+		c.auth = &authInfo{id: credentials.ID, token: credentials.Token}
+		return nil
+	}
 
 	response := new(logonResponse)
-
-	if err := c.doRequest(request, response); err != nil {
+	data := url.Values{"user": {credentials.Email}, "password": {credentials.Password}}
+	if err := c.Post("login", bytes.NewBufferString(data.Encode()), response); err != nil {
 		return err
 	}
 
-	if response.Status == "success" {
-		c.auth = &authInfo{id: response.Data.UserId, token: response.Data.Token}
-		return nil
-	} else {
-		return errors.New("Response status: " + response.Status)
-	}
+	c.auth = &authInfo{id: response.Data.UserId, token: response.Data.Token}
+	credentials.ID, credentials.Token = response.Data.UserId, response.Data.Token
+	return nil
 }
 
 // Logout a user. The function returns the response message of the server.
@@ -55,17 +55,10 @@ func (c *Client) Logout() (string, error) {
 		return "Was not logged in", nil
 	}
 
-	request, _ := http.NewRequest("POST", c.getUrl()+"/api/v1/logout", nil)
-
 	response := new(logoutResponse)
-
-	if err := c.doRequest(request, response); err != nil {
+	if err := c.Get("logout", nil, response); err != nil {
 		return "", err
 	}
 
-	if response.Status == "success" {
-		return response.data.message, nil
-	} else {
-		return "", errors.New("Response status: " + response.Status)
-	}
+	return response.Data.Message, nil
 }

@@ -29,7 +29,7 @@ func (c *Client) GetPermissions() ([]models.Permission, error) {
 		}
 
 		permissions = append(permissions, models.Permission{
-			Id:    stringOrZero(permission.Path("_id").Data()),
+			ID:    stringOrZero(permission.Path("_id").Data()),
 			Roles: roles,
 		})
 	}
