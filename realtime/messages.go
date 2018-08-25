@@ -3,6 +3,8 @@ package realtime
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"time"
 
 	"github.com/Jeffail/gabs"
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
@@ -34,9 +36,9 @@ func (c *Client) LoadHistory(roomId string) error {
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/send-message
 func (c *Client) SendMessage(channel *models.Channel, text string) (*models.Message, error) {
 	m := models.Message{
-		Id:        c.newRandomId(),
-		ChannelId: channel.Id,
-		Text:      text,
+		ID:     c.newRandomId(),
+		RoomID: channel.ID,
+		Msg:    text,
 	}
 
 	rawResponse, err := c.ddp.Call("sendMessage", m)
@@ -66,7 +68,7 @@ func (c *Client) EditMessage(message *models.Message) error {
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/delete-message
 func (c *Client) DeleteMessage(message *models.Message) error {
 	_, err := c.ddp.Call("deleteMessage", map[string]string{
-		"_id": message.Id,
+		"_id": message.ID,
 	})
 	if err != nil {
 		return err
@@ -80,7 +82,7 @@ func (c *Client) DeleteMessage(message *models.Message) error {
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/set-reaction
 func (c *Client) ReactToMessage(message *models.Message, reaction string) error {
-	_, err := c.ddp.Call("setReaction", reaction, message.Id)
+	_, err := c.ddp.Call("setReaction", reaction, message.ID)
 	if err != nil {
 		return err
 	}
@@ -94,8 +96,8 @@ func (c *Client) ReactToMessage(message *models.Message, reaction string) error 
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/star-message
 func (c *Client) StarMessage(message *models.Message) error {
 	_, err := c.ddp.Call("starMessage", map[string]interface{}{
-		"_id":     message.Id,
-		"rid":     message.ChannelId,
+		"_id":     message.ID,
+		"rid":     message.RoomID,
 		"starred": true,
 	})
 
@@ -112,8 +114,8 @@ func (c *Client) StarMessage(message *models.Message) error {
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/star-message
 func (c *Client) UnStarMessage(message *models.Message) error {
 	_, err := c.ddp.Call("starMessage", map[string]interface{}{
-		"_id":     message.Id,
-		"rid":     message.ChannelId,
+		"_id":     message.ID,
+		"rid":     message.RoomID,
 		"starred": false,
 	})
 
@@ -158,7 +160,7 @@ func (c *Client) UnPinMessage(message *models.Message) error {
 // https://rocket.chat/docs/developer-guides/realtime-api/subscriptions/stream-room-messages/
 func (c *Client) SubscribeToMessageStream(channel *models.Channel, msgChannel chan models.Message) error {
 
-	if err := c.ddp.Sub("stream-room-messages", channel.Id, send_added_event); err != nil {
+	if err := c.ddp.Sub("stream-room-messages", channel.ID, send_added_event); err != nil {
 		return err
 	}
 
@@ -193,13 +195,21 @@ func getMessageFromData(data interface{}) *models.Message {
 }
 
 func getMessageFromDocument(arg *gabs.Container) *models.Message {
+	var ts *time.Time
+	date := stringOrZero(arg.Path("ts.$date").Data())
+	if len(date) > 0 {
+		if ti, err := strconv.ParseFloat(date, 64); err == nil {
+			t := time.Unix(int64(ti)/1e3, int64(ti)%1e3)
+			ts = &t
+		}
+	}
 	return &models.Message{
-		Id:        stringOrZero(arg.Path("_id").Data()),
-		ChannelId: stringOrZero(arg.Path("rid").Data()),
-		Text:      stringOrZero(arg.Path("msg").Data()),
-		Timestamp: stringOrZero(arg.Path("ts.$date").Data()),
-		User: models.User{
-			Id:       stringOrZero(arg.Path("u._id").Data()),
+		ID:        stringOrZero(arg.Path("_id").Data()),
+		RoomID:    stringOrZero(arg.Path("rid").Data()),
+		Msg:       stringOrZero(arg.Path("msg").Data()),
+		Timestamp: ts,
+		User: &models.User{
+			ID:       stringOrZero(arg.Path("u._id").Data()),
 			UserName: stringOrZero(arg.Path("u.username").Data()),
 		},
 	}

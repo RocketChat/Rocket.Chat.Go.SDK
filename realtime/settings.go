@@ -24,7 +24,7 @@ func (c *Client) GetPublicSettings() ([]models.Setting, error) {
 
 	for _, rawSetting := range sett {
 		setting := models.Setting{
-			Id:   stringOrZero(rawSetting.Path("_id").Data()),
+			ID:   stringOrZero(rawSetting.Path("_id").Data()),
 			Type: stringOrZero(rawSetting.Path("type").Data()),
 		}
 

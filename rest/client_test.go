@@ -30,11 +30,11 @@ func getDefaultClient(t *testing.T) *Client {
 
 func getAuthenticatedClient(t *testing.T, name, email, password string) *Client {
 	client := Client{Protocol: common_testing.Protocol, Host: common_testing.Host, Port: common_testing.Port}
-	credentials := models.UserCredentials{Name: name, Email: email, Password: password}
+	credentials := &models.UserCredentials{Name: name, Email: email, Password: password}
 
 	rtClient, err := realtime.NewClient(&url.URL{Host: common_testing.Host + ":" + common_testing.Port}, true)
 	assert.Nil(t, err)
-	_, regErr := rtClient.RegisterUser(&credentials)
+	_, regErr := rtClient.RegisterUser(credentials)
 	assert.Nil(t, regErr)
 
 	loginErr := client.Login(credentials)
@@ -44,9 +44,11 @@ func getAuthenticatedClient(t *testing.T, name, email, password string) *Client 
 }
 
 func findMessage(messages []models.Message, user string, msg string) *models.Message {
-	for _, m := range messages {
-		if m.User.UserName == user && m.Text == msg {
-			return &m
+	var m *models.Message
+	for i := range messages {
+		m = &messages[i]
+		if m.User.UserName == user && m.Msg == msg {
+			return m
 		}
 	}
 

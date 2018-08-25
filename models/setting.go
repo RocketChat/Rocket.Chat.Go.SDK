@@ -1,7 +1,7 @@
 package models
 
 type Setting struct {
-	Id           string  `json:"_id"`
+	ID           string  `json:"_id"`
 	Blocked      bool    `json:"blocked"`
 	Group        string  `json:"group"`
 	Hidden       bool    `json:"hidden"`
