@@ -51,6 +51,21 @@ func TestRocket_GetServerInfo(t *testing.T) {
 			},
 			wantErr: nil,
 		},
+		{
+			name: "Version err",
+			fields: fields{
+				testDoer{
+					responseCode: 200,
+					response: `{
+						"success": false
+					  }`,
+				},
+			},
+			want: Info{
+				Version: "0.47.0-develop",
+			},
+			wantErr: errors.New("got false response"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -128,7 +143,9 @@ func TestRocket_GetDirectory(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`{"text": "gene", "type": "channels"}`}},
 			},
-			want:    Directory{},
+			want: Directory{
+				Pagination: Pagination{Count: 1, Offset: 0, Total: 1},
+			},
 			wantErr: nil,
 		},
 		{
@@ -165,8 +182,47 @@ func TestRocket_GetDirectory(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`{"text": "rocket", "type": "users"}`}},
 			},
-			want:    Directory{},
+			want: Directory{
+				Pagination: Pagination{Count: 2, Offset: 0, Total: 2},
+			},
 			wantErr: nil,
+		},
+		{
+			name: "users err",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"result": [
+						  {
+							"_id": "rocket.cat",
+							"createdAt": "2018-08-23T01:39:00.958Z",
+							"name": "Rocket.Cat",
+							"username": "rocket.cat"
+						  },
+						  {
+							"_id": "7foMpeuHzfW5Npoqg",
+							"createdAt": "2018-08-23T01:53:05.715Z",
+							"emails": [
+							  {
+								"address": "rocketchat@localhost",
+								"verified": false
+							  }
+							],
+							"name": "Rocket Admin",
+							"username": "rocketadmin"
+						  }
+						],
+						"count": 2,
+						"offset": 0,
+						"total": 2,
+						"success": false
+					  }`,
+				},
+				params: url.Values{"query": []string{`{"text": "rocket", "type": "users"}`}},
+			},
+			want:    Directory{},
+			wantErr: errors.New("got false response"),
 		},
 	}
 	for _, tt := range tests {
@@ -177,9 +233,12 @@ func TestRocket_GetDirectory(t *testing.T) {
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 
 			if err == nil {
-				//ToDO : needs a better test !
+				assert.Equal(t, got.Pagination.Count, tt.want.Pagination.Count, "Incorrect Pagination Count")
+				assert.Equal(t, got.Pagination.Offset, tt.want.Pagination.Offset, "Incorrect Pagination Offset")
+				assert.Equal(t, got.Pagination.Total, tt.want.Pagination.Total, "Incorrect Pagination Total")
 				assert.NotNil(t, got)
-				//assert.Equal(t, got, tt.want, "Unexpected error")
+				//ToDO : needs a better test !
+				//	assert.Equal(t, got, tt.want, "Unexpected error")
 			}
 		})
 	}
@@ -217,8 +276,42 @@ func TestRocket_GetSpotlight(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`#foobar`}},
 			},
-			want:    Spotlight{},
+			want: Spotlight{
+				Users: []User{
+					User{
+						ID:           "rocket.cat",
+						Name:         "Rocket.Cat",
+						UserName:     "rocket.cat",
+						Status:       "online",
+						Token:        "",
+						TokenExpires: 0},
+				},
+				Rooms: []Channel{},
+			},
 			wantErr: nil,
+		},
+		{
+			name: "GetSpotlight err",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"users": [
+						  {
+							"_id": "rocket.cat",
+							"name": "Rocket.Cat",
+							"username": "rocket.cat",
+							"status": "online"
+						  }
+						],
+						"rooms": [],
+						"success": false
+					  }`,
+				},
+				params: url.Values{"query": []string{`#foobar`}},
+			},
+			want:    Spotlight{},
+			wantErr: errors.New("got false response"),
 		},
 	}
 	for _, tt := range tests {
@@ -229,9 +322,11 @@ func TestRocket_GetSpotlight(t *testing.T) {
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 
 			if err == nil {
-				//ToDO : needs a better test !
 				assert.NotNil(t, got)
-				//assert.Equal(t, got, tt.want, "Unexpected error")
+				assert.Equal(t, got.Users[0].ID, tt.want.Users[0].ID, "ID did not match")
+				assert.Equal(t, got.Users[0].Name, tt.want.Users[0].Name, "Name did not match")
+				assert.Equal(t, got.Users[0].UserName, tt.want.Users[0].UserName, "UserName did not match")
+				assert.Equal(t, got.Users[0].Status, tt.want.Users[0].Status, "Name did not match")
 			}
 		})
 	}
@@ -409,3 +504,138 @@ func TestRocket_GetStatistics(t *testing.T) {
 // 	assert.Nil(t, err)
 // 	assert.NotNil(t, statistics)
 // }
+
+func TestRocket_GetStatisticsList(t *testing.T) {
+
+	type fields struct {
+		myDoer Doer
+		params url.Values
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    StatisticsList
+		wantErr error
+	}{
+		{
+			name: "GetStatisticsList OK",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"statistics": [
+							{
+								"_id":"v3D4mvobwfznKozH8",
+								"uniqueId":"wD4EP3M7FeFzJZgk9",
+								"installedAt":"2018-02-18T19:40:45.369Z",
+								"version":"0.61.0-develop",
+								"totalUsers":88,
+								"activeUsers":88,
+								"nonActiveUsers":0,
+								"onlineUsers":0,
+								"awayUsers":1,
+								"offlineUsers":87,
+								"totalRooms":81,
+								"totalChannels":41,
+								"totalPrivateGroups":37,
+								"totalDirect":3,
+								"totlalLivechat":0,
+								"totalMessages":2408,
+								"totalChannelMessages":730,
+								"totalPrivateGroupMessages":1869,
+								"totalDirectMessages":25,
+								"totalLivechatMessages":0,
+								"lastLogin":"2018-02-24T12:44:45.045Z",
+								"lastMessageSentAt":"2018-02-23T18:14:03.490Z",
+								"lastSeenSubscription":"2018-02-23T17:58:54.779Z",
+								"instanceCount":1,
+								"createdAt":"2018-02-24T15:13:00.312Z",
+								"_updatedAt":"2018-02-24T15:13:00.312Z"
+							}
+						],
+						"count":1,
+						"offset":0,
+						"total":1,
+						"success":true
+					}`,
+				},
+				params: url.Values{"query": []string{`{"_id" : "zT26ye8RAM7MaEN7S"}`}},
+			},
+			want: StatisticsList{
+				Statistics: []Statistics{
+					Statistics{
+						ID:          "v3D4mvobwfznKozH8",
+						UniqueID:    "wD4EP3M7FeFzJZgk9",
+						ActiveUsers: 88,
+						TotalRooms:  81,
+					},
+				},
+				Pagination: Pagination{Count: 2, Offset: 0, Total: 2},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "GetStatisticsList err",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"statistics": [
+							{
+								"_id":"v3D4mvobwfznKozH8",
+								"uniqueId":"wD4EP3M7FeFzJZgk9",
+								"installedAt":"2018-02-18T19:40:45.369Z",
+								"version":"0.61.0-develop",
+								"totalUsers":88,
+								"activeUsers":88,
+								"nonActiveUsers":0,
+								"onlineUsers":0,
+								"awayUsers":1,
+								"offlineUsers":87,
+								"totalRooms":81,
+								"totalChannels":41,
+								"totalPrivateGroups":37,
+								"totalDirect":3,
+								"totlalLivechat":0,
+								"totalMessages":2408,
+								"totalChannelMessages":730,
+								"totalPrivateGroupMessages":1869,
+								"totalDirectMessages":25,
+								"totalLivechatMessages":0,
+								"lastLogin":"2018-02-24T12:44:45.045Z",
+								"lastMessageSentAt":"2018-02-23T18:14:03.490Z",
+								"lastSeenSubscription":"2018-02-23T17:58:54.779Z",
+								"instanceCount":1,
+								"createdAt":"2018-02-24T15:13:00.312Z",
+								"_updatedAt":"2018-02-24T15:13:00.312Z"
+							}
+						],
+						"count":1,
+						"offset":0,
+						"total":1,
+						"success":false
+					}`,
+				},
+				params: url.Values{"query": []string{`{"_id" : "zT26ye8RAM7MaEN7S"}`}},
+			},
+			want:    StatisticsList{},
+			wantErr: errors.New("got false response"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rt := CreateTestRestClient(tt.fields.myDoer)
+			got, err := rt.Rest.GetStatisticsList(tt.fields.params)
+
+			assert.Equal(t, err, tt.wantErr, "Unexpected error")
+
+			if err == nil {
+				assert.NotNil(t, got)
+				assert.Equal(t, got.Statistics[0].ID, tt.want.Statistics[0].ID, "ID did not match")
+				assert.Equal(t, got.Statistics[0].UniqueID, tt.want.Statistics[0].UniqueID, "UniqueID did not match")
+				assert.Equal(t, got.Statistics[0].ActiveUsers, tt.want.Statistics[0].ActiveUsers, "ActiveUsers did not match")
+				assert.Equal(t, got.Statistics[0].TotalRooms, tt.want.Statistics[0].TotalRooms, "TotalRooms did not match")
+			}
+		})
+	}
+}
