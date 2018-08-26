@@ -1,14 +1,74 @@
-package realtime
+package goRocket
 
 import (
+	"bytes"
+	"fmt"
 	"log"
+	"net/url"
 
 	"github.com/Jeffail/gabs"
-	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
-func (c *Client) GetChannelId(name string) (string, error) {
-	rawResponse, err := c.ddp.Call("getRoomIdByNameOrId", name)
+// ChannelsResponse used when returning channel lists
+type ChannelsResponse struct {
+	Status
+	Pagination
+	Channels []Channel `json:"channels"`
+}
+
+// ChannelResponse on a single channel
+type ChannelResponse struct {
+	Status
+	Channel Channel `json:"channel"`
+}
+
+// GetPublicChannels returns all channels that can be seen by the logged in user.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/list
+func (c *RestService) GetPublicChannels() (*ChannelsResponse, error) {
+	response := new(ChannelsResponse)
+	if err := c.Get("channels.list", nil, response); err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+// GetJoinedChannels returns all channels that the user has joined.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/list-joined
+func (c *RestService) GetJoinedChannels(params url.Values) (*ChannelsResponse, error) {
+	response := new(ChannelsResponse)
+	if err := c.Get("channels.list.joined", params, response); err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+// LeaveChannel leaves a channel. The id of the channel has to be not nil.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/leave
+func (c *RestService) LeaveChannel(channel *Channel) error {
+	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
+	return c.Post("channels.leave", bytes.NewBufferString(body), new(ChannelResponse))
+}
+
+// GetChannelInfo get information about a channel. That might be useful to update the usernames.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/info
+func (c *RestService) GetChannelInfo(channel *Channel) (*Channel, error) {
+	response := new(ChannelResponse)
+	if err := c.Get("channels.info", url.Values{"roomId": []string{channel.ID}}, response); err != nil {
+		return nil, err
+	}
+
+	return &response.Channel, nil
+}
+
+// GetChannelID ..
+func (c *LiveService) GetChannelID(name string) (string, error) {
+	rawResponse, err := c.client.ddp.Call("getRoomIdByNameOrId", name)
 	if err != nil {
 		return "", err
 	}
@@ -22,8 +82,8 @@ func (c *Client) GetChannelId(name string) (string, error) {
 // Optionally includes date to get all since last check or 0 to get all
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-rooms/
-func (c *Client) GetChannelsIn() ([]models.Channel, error) {
-	rawResponse, err := c.ddp.Call("rooms/get", map[string]int{
+func (c *LiveService) GetChannelsIn() ([]Channel, error) {
+	rawResponse, err := c.client.ddp.Call("rooms/get", map[string]int{
 		"$date": 0,
 	})
 	if err != nil {
@@ -34,10 +94,10 @@ func (c *Client) GetChannelsIn() ([]models.Channel, error) {
 
 	chans, err := document.Children()
 
-	var channels []models.Channel
+	var channels []Channel
 
 	for _, i := range chans {
-		channels = append(channels, models.Channel{
+		channels = append(channels, Channel{
 			ID: stringOrZero(i.Path("_id").Data()),
 			//Default: stringOrZero(i.Path("default").Data()),
 			Name: stringOrZero(i.Path("name").Data()),
@@ -52,8 +112,8 @@ func (c *Client) GetChannelsIn() ([]models.Channel, error) {
 // Optionally includes date to get all since last check or 0 to get all
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-subscriptions
-func (c *Client) GetChannelSubscriptions() ([]models.ChannelSubscription, error) {
-	rawResponse, err := c.ddp.Call("subscriptions/get", map[string]int{
+func (c *LiveService) GetChannelSubscriptions() ([]ChannelSubscription, error) {
+	rawResponse, err := c.client.ddp.Call("subscriptions/get", map[string]int{
 		"$date": 0,
 	})
 	if err != nil {
@@ -64,17 +124,17 @@ func (c *Client) GetChannelSubscriptions() ([]models.ChannelSubscription, error)
 
 	channelSubs, err := document.Children()
 
-	var channelSubscriptions []models.ChannelSubscription
+	var channelSubscriptions []ChannelSubscription
 
 	for _, sub := range channelSubs {
-		channelSubscription := models.ChannelSubscription{
+		channelSubscription := ChannelSubscription{
 			ID:          stringOrZero(sub.Path("_id").Data()),
 			Alert:       sub.Path("alert").Data().(bool),
 			Name:        stringOrZero(sub.Path("name").Data()),
 			DisplayName: stringOrZero(sub.Path("fname").Data()),
 			Open:        sub.Path("open").Data().(bool),
 			Type:        stringOrZero(sub.Path("t").Data()),
-			User: models.User{
+			User: User{
 				ID:       stringOrZero(sub.Path("u._id").Data()),
 				UserName: stringOrZero(sub.Path("u.username").Data()),
 			},
@@ -99,8 +159,8 @@ func (c *Client) GetChannelSubscriptions() ([]models.ChannelSubscription, error)
 // GetChannelRoles returns room roles
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-room-roles
-func (c *Client) GetChannelRoles(roomId string) error {
-	_, err := c.ddp.Call("getRoomRoles", roomId)
+func (c *LiveService) GetChannelRoles(roomID string) error {
+	_, err := c.client.ddp.Call("getRoomRoles", roomID)
 	if err != nil {
 		return err
 	}
@@ -112,8 +172,8 @@ func (c *Client) GetChannelRoles(roomId string) error {
 // Takes name and users array
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/create-channels
-func (c *Client) CreateChannel(name string, users []string) error {
-	_, err := c.ddp.Call("createChannel", name, users)
+func (c *LiveService) CreateChannel(name string, users []string) error {
+	_, err := c.client.ddp.Call("createChannel", name, users)
 	if err != nil {
 		return err
 	}
@@ -125,8 +185,8 @@ func (c *Client) CreateChannel(name string, users []string) error {
 // Takes group name and array of users
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/create-private-groups
-func (c *Client) CreateGroup(name string, users []string) error {
-	_, err := c.ddp.Call("createPrivateGroup", name, users)
+func (c *LiveService) CreateGroup(name string, users []string) error {
+	_, err := c.client.ddp.Call("createPrivateGroup", name, users)
 	if err != nil {
 		return err
 	}
@@ -135,11 +195,11 @@ func (c *Client) CreateGroup(name string, users []string) error {
 }
 
 // JoinChannel joins a channel
-// Takes roomId
+// Takes roomID
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/joining-channels
-func (c *Client) JoinChannel(roomId string) error {
-	_, err := c.ddp.Call("joinRoom", roomId)
+func (c *LiveService) JoinChannel(roomID string) error {
+	_, err := c.client.ddp.Call("joinRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -148,11 +208,11 @@ func (c *Client) JoinChannel(roomId string) error {
 }
 
 // LeaveChannel leaves a channel
-// Takes roomId
+// Takes roomID
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/leaving-rooms
-func (c *Client) LeaveChannel(roomId string) error {
-	_, err := c.ddp.Call("leaveRoom", roomId)
+func (c *LiveService) LeaveChannel(roomID string) error {
+	_, err := c.client.ddp.Call("leaveRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -161,11 +221,11 @@ func (c *Client) LeaveChannel(roomId string) error {
 }
 
 // ArchiveChannel archives the channel
-// Takes roomId
+// Takes roomID
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/archive-rooms
-func (c *Client) ArchiveChannel(roomId string) error {
-	_, err := c.ddp.Call("archiveRoom", roomId)
+func (c *LiveService) ArchiveChannel(roomID string) error {
+	_, err := c.client.ddp.Call("archiveRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -174,11 +234,11 @@ func (c *Client) ArchiveChannel(roomId string) error {
 }
 
 // UnArchiveChannel unarchives the channel
-// Takes roomId
+// Takes roomID
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/unarchive-rooms
-func (c *Client) UnArchiveChannel(roomId string) error {
-	_, err := c.ddp.Call("unarchiveRoom", roomId)
+func (c *LiveService) UnArchiveChannel(roomID string) error {
+	_, err := c.client.ddp.Call("unarchiveRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -187,11 +247,11 @@ func (c *Client) UnArchiveChannel(roomId string) error {
 }
 
 // DeleteChannel deletes the channel
-// Takes roomId
+// Takes roomID
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/delete-rooms
-func (c *Client) DeleteChannel(roomId string) error {
-	_, err := c.ddp.Call("eraseRoom", roomId)
+func (c *LiveService) DeleteChannel(roomID string) error {
+	_, err := c.client.ddp.Call("eraseRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -200,11 +260,11 @@ func (c *Client) DeleteChannel(roomId string) error {
 }
 
 // SetChannelTopic sets channel topic
-// takes roomId and topic
+// takes roomID and topic
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelTopic(roomId string, topic string) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "roomTopic", topic)
+func (c *LiveService) SetChannelTopic(roomID string, topic string) error {
+	_, err := c.client.ddp.Call("saveRoomSettings", roomID, "roomTopic", topic)
 	if err != nil {
 		return err
 	}
@@ -213,11 +273,11 @@ func (c *Client) SetChannelTopic(roomId string, topic string) error {
 }
 
 // SetChannelType sets the channel type
-// takes roomId and roomType
+// takes roomID and roomType
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelType(roomId string, roomType string) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "roomType", roomType)
+func (c *LiveService) SetChannelType(roomID string, roomType string) error {
+	_, err := c.client.ddp.Call("saveRoomSettings", roomID, "roomType", roomType)
 	if err != nil {
 		return err
 	}
@@ -226,11 +286,11 @@ func (c *Client) SetChannelType(roomId string, roomType string) error {
 }
 
 // SetChannelJoinCode sets channel join code
-// takes roomId and joinCode
+// takes roomID and joinCode
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelJoinCode(roomId string, joinCode string) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "joinCode", joinCode)
+func (c *LiveService) SetChannelJoinCode(roomID string, joinCode string) error {
+	_, err := c.client.ddp.Call("saveRoomSettings", roomID, "joinCode", joinCode)
 	if err != nil {
 		return err
 	}
@@ -239,11 +299,11 @@ func (c *Client) SetChannelJoinCode(roomId string, joinCode string) error {
 }
 
 // SetChannelReadOnly sets channel as read only
-// takes roomId and boolean
+// takes roomID and boolean
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelReadOnly(roomId string, readOnly bool) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "readOnly", readOnly)
+func (c *LiveService) SetChannelReadOnly(roomID string, readOnly bool) error {
+	_, err := c.client.ddp.Call("saveRoomSettings", roomID, "readOnly", readOnly)
 	if err != nil {
 		return err
 	}
@@ -252,11 +312,11 @@ func (c *Client) SetChannelReadOnly(roomId string, readOnly bool) error {
 }
 
 // SetChannelDescription sets channels description
-// takes roomId and description
+// takes roomID and description
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelDescription(roomId string, description string) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "roomDescription", description)
+func (c *LiveService) SetChannelDescription(roomID string, description string) error {
+	_, err := c.client.ddp.Call("saveRoomSettings", roomID, "roomDescription", description)
 	if err != nil {
 		return err
 	}

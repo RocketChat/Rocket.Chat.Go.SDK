@@ -1,28 +1,88 @@
-package realtime
+package goRocket
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"html"
 	"log"
+	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/Jeffail/gabs"
-	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 	"github.com/gopackage/ddp"
 )
 
 const (
 	// RocketChat doesn't send the `added` event for new messages by default, only `changed`.
-	send_added_event    = true
-	default_buffer_size = 100
+	sendAddedEvent    = true
+	defaultBufferSize = 100
 )
 
+// MessagesResponse hold messages
+type MessagesResponse struct {
+	Status
+	Messages []Message `json:"messages"`
+}
+
+// MessageResponse a message
+type MessageResponse struct {
+	Status
+	Message Message `json:"message"`
+}
+
+// Send a message to a channel. The name of the channel has to be not nil.
+// The message will be html escaped.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
+func (c *RestService) Send(channel *Channel, msg string) error {
+	body := fmt.Sprintf(`{ "channel": "%s", "text": "%s"}`, channel.Name, html.EscapeString(msg))
+	return c.Post("chat.postMessage", bytes.NewBufferString(body), new(MessageResponse))
+}
+
+// PostMessage send a message to a channel. The channel or roomId has to be not nil.
+// The message will be json encode.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
+func (c *RestService) PostMessage(msg *PostMessage) (*MessageResponse, error) {
+	body, err := json.Marshal(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(MessageResponse)
+	err = c.Post("chat.postMessage", bytes.NewBuffer(body), response)
+	return response, err
+}
+
+// GetMessages from a channel. The channel id has to be not nil. Optionally a
+// count can be specified to limit the size of the returned messages.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/history
+func (c *RestService) GetMessages(channel *Channel, page *Pagination) ([]Message, error) {
+	params := url.Values{
+		"roomId": []string{channel.ID},
+	}
+
+	if page != nil {
+		params.Add("count", strconv.Itoa(page.Count))
+	}
+
+	response := new(MessagesResponse)
+	if err := c.Get("channels.history", params, response); err != nil {
+		return nil, err
+	}
+
+	return response.Messages, nil
+}
+
 // LoadHistory loads history
-// Takes roomId
+// Takes roomID
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/load-history
-func (c *Client) LoadHistory(roomId string) error {
-	_, err := c.ddp.Call("loadHistory", roomId)
+func (c *LiveService) LoadHistory(roomID string) error {
+	_, err := c.client.ddp.Call("loadHistory", roomID)
 	if err != nil {
 		return err
 	}
@@ -34,14 +94,14 @@ func (c *Client) LoadHistory(roomId string) error {
 // takes channel and message
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/send-message
-func (c *Client) SendMessage(channel *models.Channel, text string) (*models.Message, error) {
-	m := models.Message{
-		ID:     c.newRandomId(),
+func (c *LiveService) SendMessage(channel *Channel, text string) (*Message, error) {
+	m := Message{
+		ID:     c.newRandomID(),
 		RoomID: channel.ID,
 		Msg:    text,
 	}
 
-	rawResponse, err := c.ddp.Call("sendMessage", m)
+	rawResponse, err := c.client.ddp.Call("sendMessage", m)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +113,8 @@ func (c *Client) SendMessage(channel *models.Channel, text string) (*models.Mess
 // takes message object
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/update-message
-func (c *Client) EditMessage(message *models.Message) error {
-	_, err := c.ddp.Call("updateMessage", message)
+func (c *LiveService) EditMessage(message *Message) error {
+	_, err := c.client.ddp.Call("updateMessage", message)
 	if err != nil {
 		return err
 	}
@@ -66,8 +126,8 @@ func (c *Client) EditMessage(message *models.Message) error {
 // takes a message object
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/delete-message
-func (c *Client) DeleteMessage(message *models.Message) error {
-	_, err := c.ddp.Call("deleteMessage", map[string]string{
+func (c *LiveService) DeleteMessage(message *Message) error {
+	_, err := c.client.ddp.Call("deleteMessage", map[string]string{
 		"_id": message.ID,
 	})
 	if err != nil {
@@ -81,8 +141,8 @@ func (c *Client) DeleteMessage(message *models.Message) error {
 // takes a message and emoji
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/set-reaction
-func (c *Client) ReactToMessage(message *models.Message, reaction string) error {
-	_, err := c.ddp.Call("setReaction", reaction, message.ID)
+func (c *LiveService) ReactToMessage(message *Message, reaction string) error {
+	_, err := c.client.ddp.Call("setReaction", reaction, message.ID)
 	if err != nil {
 		return err
 	}
@@ -94,8 +154,8 @@ func (c *Client) ReactToMessage(message *models.Message, reaction string) error 
 // takes a message object
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/star-message
-func (c *Client) StarMessage(message *models.Message) error {
-	_, err := c.ddp.Call("starMessage", map[string]interface{}{
+func (c *LiveService) StarMessage(message *Message) error {
+	_, err := c.client.ddp.Call("starMessage", map[string]interface{}{
 		"_id":     message.ID,
 		"rid":     message.RoomID,
 		"starred": true,
@@ -112,8 +172,8 @@ func (c *Client) StarMessage(message *models.Message) error {
 // takes message object
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/star-message
-func (c *Client) UnStarMessage(message *models.Message) error {
-	_, err := c.ddp.Call("starMessage", map[string]interface{}{
+func (c *LiveService) UnStarMessage(message *Message) error {
+	_, err := c.client.ddp.Call("starMessage", map[string]interface{}{
 		"_id":     message.ID,
 		"rid":     message.RoomID,
 		"starred": false,
@@ -130,8 +190,8 @@ func (c *Client) UnStarMessage(message *models.Message) error {
 // takes a message object
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/pin-message
-func (c *Client) PinMessage(message *models.Message) error {
-	_, err := c.ddp.Call("pinMessage", message)
+func (c *LiveService) PinMessage(message *Message) error {
+	_, err := c.client.ddp.Call("pinMessage", message)
 
 	if err != nil {
 		return err
@@ -144,8 +204,8 @@ func (c *Client) PinMessage(message *models.Message) error {
 // takes a message object
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/unpin-messages
-func (c *Client) UnPinMessage(message *models.Message) error {
-	_, err := c.ddp.Call("unpinMessage", message)
+func (c *LiveService) UnPinMessage(message *Message) error {
+	_, err := c.client.ddp.Call("unpinMessage", message)
 
 	if err != nil {
 		return err
@@ -158,28 +218,28 @@ func (c *Client) UnPinMessage(message *models.Message) error {
 // Returns a buffered channel
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/subscriptions/stream-room-messages/
-func (c *Client) SubscribeToMessageStream(channel *models.Channel, msgChannel chan models.Message) error {
+func (c *LiveService) SubscribeToMessageStream(channel *Channel, msgChannel chan Message) error {
 
-	if err := c.ddp.Sub("stream-room-messages", channel.ID, send_added_event); err != nil {
+	if err := c.client.ddp.Sub("stream-room-messages", channel.ID, sendAddedEvent); err != nil {
 		return err
 	}
 
-	//msgChannel := make(chan models.Message, default_buffer_size)
-	c.ddp.CollectionByName("stream-room-messages").AddUpdateListener(messageExtractor{msgChannel, "update"})
+	//msgChannel := make(chan Message, default_buffer_size)
+	c.client.ddp.CollectionByName("stream-room-messages").AddUpdateListener(messageExtractor{msgChannel, "update"})
 
 	return nil
 }
 
-func getMessagesFromUpdateEvent(update ddp.Update) []models.Message {
+func getMessagesFromUpdateEvent(update ddp.Update) []Message {
 	document, _ := gabs.Consume(update["args"])
 	args, err := document.Children()
 
 	if err != nil {
 		log.Printf("Event arguments are in an unexpected format: %v", err)
-		return make([]models.Message, 0)
+		return make([]Message, 0)
 	}
 
-	messages := make([]models.Message, len(args))
+	messages := make([]Message, len(args))
 
 	for i, arg := range args {
 		messages[i] = *getMessageFromDocument(arg)
@@ -188,13 +248,13 @@ func getMessagesFromUpdateEvent(update ddp.Update) []models.Message {
 	return messages
 }
 
-func getMessageFromData(data interface{}) *models.Message {
+func getMessageFromData(data interface{}) *Message {
 	// TODO: We should know what this will look like, we shouldn't need to use gabs
 	document, _ := gabs.Consume(data)
 	return getMessageFromDocument(document)
 }
 
-func getMessageFromDocument(arg *gabs.Container) *models.Message {
+func getMessageFromDocument(arg *gabs.Container) *Message {
 	var ts *time.Time
 	date := stringOrZero(arg.Path("ts.$date").Data())
 	if len(date) > 0 {
@@ -203,12 +263,12 @@ func getMessageFromDocument(arg *gabs.Container) *models.Message {
 			ts = &t
 		}
 	}
-	return &models.Message{
+	return &Message{
 		ID:        stringOrZero(arg.Path("_id").Data()),
 		RoomID:    stringOrZero(arg.Path("rid").Data()),
 		Msg:       stringOrZero(arg.Path("msg").Data()),
 		Timestamp: ts,
-		User: &models.User{
+		User: &User{
 			ID:       stringOrZero(arg.Path("u._id").Data()),
 			UserName: stringOrZero(arg.Path("u.username").Data()),
 		},
@@ -231,7 +291,7 @@ func stringOrZero(i interface{}) string {
 }
 
 type messageExtractor struct {
-	messageChannel chan models.Message
+	messageChannel chan Message
 	operation      string
 }
 
