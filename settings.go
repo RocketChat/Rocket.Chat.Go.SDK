@@ -1,17 +1,16 @@
-package realtime
+package goRocket
 
 import (
 	"log"
 
 	"github.com/Jeffail/gabs"
-	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 // GetPublicSettings gets public settings
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-public-settings
-func (c *Client) GetPublicSettings() ([]models.Setting, error) {
-	rawResponse, err := c.ddp.Call("public-settings/get")
+func (c *LiveService) GetPublicSettings() ([]Setting, error) {
+	rawResponse, err := c.client.ddp.Call("public-settings/get")
 	if err != nil {
 		return nil, err
 	}
@@ -20,10 +19,10 @@ func (c *Client) GetPublicSettings() ([]models.Setting, error) {
 
 	sett, _ := document.Children()
 
-	var settings []models.Setting
+	var settings []Setting
 
 	for _, rawSetting := range sett {
-		setting := models.Setting{
+		setting := Setting{
 			ID:   stringOrZero(rawSetting.Path("_id").Data()),
 			Type: stringOrZero(rawSetting.Path("type").Data()),
 		}
@@ -40,8 +39,8 @@ func (c *Client) GetPublicSettings() ([]models.Setting, error) {
 		case "int":
 			setting.ValueInt = rawSetting.Path("value").Data().(float64)
 		case "asset":
-			setting.ValueAsset = models.Asset{
-				DefaultUrl: stringOrZero(rawSetting.Path("value").Data().(map[string]interface{})["defaultUrl"]),
+			setting.ValueAsset = Asset{
+				DefaultURL: stringOrZero(rawSetting.Path("value").Data().(map[string]interface{})["defaultUrl"]),
 			}
 
 		default:
