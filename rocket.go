@@ -89,6 +89,7 @@ func NewLiveClient(serverURL *url.URL, debug bool) (*RocketClient, error) {
 	port := "80"
 
 	if serverURL.Scheme == "https" {
+		wsURL = "wss"
 		port = "443"
 	}
 
