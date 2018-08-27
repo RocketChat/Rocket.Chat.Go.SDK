@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRocket_GetPublicChannels(t *testing.T) {
+func TestRestService_GetPublicChannels(t *testing.T) {
 
 	type fields struct {
 		myDoer Doer
@@ -109,7 +109,7 @@ func TestRocket_GetPublicChannels(t *testing.T) {
 	}
 }
 
-func TestRocket_GetJoinedChannels(t *testing.T) {
+func TestRestService_GetJoinedChannels(t *testing.T) {
 
 	type fields struct {
 		myDoer Doer
@@ -198,7 +198,7 @@ func TestRocket_GetJoinedChannels(t *testing.T) {
 	}
 }
 
-func TestRocket_LeaveChannel(t *testing.T) {
+func TestRestService_LeaveChannel(t *testing.T) {
 
 	type fields struct {
 		myDoer  Doer
@@ -275,7 +275,7 @@ func TestRocket_LeaveChannel(t *testing.T) {
 	}
 }
 
-func TestRocket_GetChannelInfo(t *testing.T) {
+func TestRestService_GetChannelInfo(t *testing.T) {
 
 	type fields struct {
 		myDoer  Doer
