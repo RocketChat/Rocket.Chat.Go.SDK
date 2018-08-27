@@ -1,17 +1,16 @@
-package realtime
+package goRocket
 
 import (
 	"log"
 
 	"github.com/Jeffail/gabs"
-	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 // GetPermissions gets permissions
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-permissions
-func (c *Client) GetPermissions() ([]models.Permission, error) {
-	rawResponse, err := c.ddp.Call("permissions/get")
+func (c *LiveService) GetPermissions() ([]Permission, error) {
+	rawResponse, err := c.client.ddp.Call("permissions/get")
 	if err != nil {
 		return nil, err
 	}
@@ -20,7 +19,7 @@ func (c *Client) GetPermissions() ([]models.Permission, error) {
 
 	perms, _ := document.Children()
 
-	var permissions []models.Permission
+	var permissions []Permission
 
 	for _, permission := range perms {
 		var roles []string
@@ -28,7 +27,7 @@ func (c *Client) GetPermissions() ([]models.Permission, error) {
 			roles = append(roles, role.(string))
 		}
 
-		permissions = append(permissions, models.Permission{
+		permissions = append(permissions, Permission{
 			ID:    stringOrZero(permission.Path("_id").Data()),
 			Roles: roles,
 		})
@@ -40,15 +39,21 @@ func (c *Client) GetPermissions() ([]models.Permission, error) {
 // GetUserRoles gets current users roles
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-user-roles
-func (c *Client) GetUserRoles() error {
-	rawResponse, err := c.ddp.Call("getUserRoles")
+func (c *LiveService) GetUserRoles() error {
+	rawResponse, err := c.client.ddp.Call("getUserRoles")
 	if err != nil {
 		return err
 	}
 
-	document, _ := gabs.Consume(rawResponse)
-
+	document, err := gabs.Consume(rawResponse)
+	if err != nil {
+		log.Println(err)
+	}
 	roles, err := document.Children()
+	if err != nil {
+		log.Println(err)
+	}
+
 	// TODO: Figure out if this function is even useful if so return it
 	log.Println(roles)
 
