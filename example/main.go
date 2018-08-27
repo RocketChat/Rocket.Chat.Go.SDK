@@ -66,4 +66,26 @@ func main() {
 		fmt.Println("")
 	}
 
+	msgOBJ := goRocket.Attachment{
+		Color:    "#00ff00",
+		Text:     "Yay for the gopher!",
+		ImageURL: "https://ih1.redbubble.net/image.377846240.0222/ap,550x550,12x16,1,transparent,t.png",
+		Title:    "PostMessage Example for Go",
+		Fields: []goRocket.AttachmentField{
+			goRocket.AttachmentField{Short: true, Title: "Get the package", Value: "[Link](https://github.com/RocketChat/Rocket.Chat.Go.SDK) Rocket.Chat.Go.SDK"},
+		},
+	}
+
+	msgPOST := goRocket.PostMessage{
+		RoomID:  "GENERAL",
+		Channel: "general",
+		Emoji:   ":smirk:",
+		Text:    "PostMessage API using GoLang works ok",
+		Attachments: []goRocket.Attachment{
+			msgOBJ,
+		},
+	}
+
+	rc.Rest.PostMessage(&msgPOST)
+
 }
