@@ -30,7 +30,7 @@ func (nd testDoer) Do(*http.Request) (*http.Response, error) {
 }
 
 func CreateTestRestClient(d Doer) *RocketClient {
-	rockerServer := &url.URL{Host: "rocketchat.benon.com", Scheme: "https"}
+	rockerServer := &url.URL{Host: "rocketchat.localhost", Scheme: "https"}
 	client, _ := NewRestClient(rockerServer, false)
 
 	// Protocol: common_testing.Protocol,
