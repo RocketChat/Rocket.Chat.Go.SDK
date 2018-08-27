@@ -10,13 +10,13 @@ import (
 )
 
 var (
-	testUserName  string
-	testUserEmail string
-	testPassword  = "test"
-	rocketClient  *RocketClient
+	testUserName  string        // nolint
+	testUserEmail string        // nolint
+	testPassword  = "test"      // nolint
+	rocketClient  *RocketClient // nolint
 )
 
-// no lint - deadcode !
+// nolint - deadcode !
 func getDefaultClient(t *testing.T) *RocketClient {
 
 	if rocketClient == nil {
@@ -28,6 +28,7 @@ func getDefaultClient(t *testing.T) *RocketClient {
 	return rocketClient
 }
 
+// nolint is unused
 func getAuthenticatedClient(t *testing.T, name, email, password string) *RocketClient {
 	client := RocketClient{Protocol: Protocol, Host: Host, Port: Port}
 	credentials := &UserCredentials{Name: name, Email: email, Password: password}
@@ -43,7 +44,7 @@ func getAuthenticatedClient(t *testing.T, name, email, password string) *RocketC
 	return &client
 }
 
-// no lint - deadcode !
+// nolint - deadcode !
 func findMessage(messages []Message, user string, msg string) *Message {
 	var m *Message
 	for i := range messages {
@@ -56,7 +57,7 @@ func findMessage(messages []Message, user string, msg string) *Message {
 	return nil
 }
 
-// no lint - deadcode !
+// nolint - deadcode !
 func getChannel(channels []Channel, name string) *Channel {
 	for _, r := range channels {
 		if r.Name == name {

@@ -45,9 +45,15 @@ func (c *LiveService) GetUserRoles() error {
 		return err
 	}
 
-	document, _ := gabs.Consume(rawResponse)
-
+	document, err := gabs.Consume(rawResponse)
+	if err != nil {
+		log.Println(err)
+	}
 	roles, err := document.Children()
+	if err != nil {
+		log.Println(err)
+	}
+
 	// TODO: Figure out if this function is even useful if so return it
 	log.Println(roles)
 

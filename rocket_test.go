@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// nolint
 type wonkyReader struct{}
 
 func (wr wonkyReader) Read(p []byte) (n int, err error) {
@@ -32,23 +33,18 @@ func (nd testDoer) Do(*http.Request) (*http.Response, error) {
 func CreateTestRestClient(d Doer) *RocketClient {
 	rockerServer := &url.URL{Host: "rocketchat.localhost", Scheme: "https"}
 	client, _ := NewRestClient(rockerServer, false)
-
-	// Protocol: common_testing.Protocol,
-	// Host: common_testing.Host,
-	// Port: common_testing.Port
 	client.myDoer = d
 	return client
 }
 
-// no lint
 const (
-	chars    = "abcdefghijklmnopqrstuvwxyz0123456789"
-	Protocol = "http"
-	Host     = "localhost"
-	Port     = "3000"
+	chars    = "abcdefghijklmnopqrstuvwxyz0123456789" // nolint
+	Protocol = "http"                                 // nolint
+	Host     = "localhost"                            // nolint
+	Port     = "3000"                                 // nolint
 )
 
-// no lint
+// nolint
 func GetRandomString() string {
 	length := 6
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -59,7 +55,7 @@ func GetRandomString() string {
 	return string(result)
 }
 
-// no lint
+// nolint
 func GetRandomEmail() string {
 	return GetRandomString() + "@localhost.com"
 }

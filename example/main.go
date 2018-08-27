@@ -86,6 +86,10 @@ func main() {
 		},
 	}
 
-	rc.Rest.PostMessage(&msgPOST)
+	message, err := rc.Rest.PostMessage(&msgPOST)
+	log.Println(message)
 
+	if err != nil {
+		log.Println(err)
+	}
 }

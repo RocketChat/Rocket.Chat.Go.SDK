@@ -93,6 +93,9 @@ func (c *LiveService) GetChannelsIn() ([]Channel, error) {
 	document, _ := gabs.Consume(rawResponse.(map[string]interface{})["update"])
 
 	chans, err := document.Children()
+	if err != nil {
+		log.Println(err)
+	}
 
 	var channels []Channel
 
@@ -120,9 +123,15 @@ func (c *LiveService) GetChannelSubscriptions() ([]ChannelSubscription, error) {
 		return nil, err
 	}
 
-	document, _ := gabs.Consume(rawResponse.(map[string]interface{})["update"])
+	document, err := gabs.Consume(rawResponse.(map[string]interface{})["update"])
+	if err != nil {
+		log.Println(err)
+	}
 
 	channelSubs, err := document.Children()
+	if err != nil {
+		log.Println(err)
+	}
 
 	var channelSubscriptions []ChannelSubscription
 
