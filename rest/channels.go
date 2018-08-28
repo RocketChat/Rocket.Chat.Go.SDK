@@ -42,6 +42,14 @@ func (c *RestService) ChannelsCreate(channel *models.Channel) error {
 	return c.Post("channels.create", bytes.NewBufferString(body), new(ChannelResponse))
 }
 
+// ChannelClose Removes the channel from the user’s list of channels.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/create
+func (c *RestService) ChannelClose(channel *models.Channel) error {
+	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
+	return c.Post("channels.close", bytes.NewBufferString(body), new(ChannelResponse))
+}
+
 // GetJoinedChannels returns all channels that the user has joined.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list-joined
