@@ -18,8 +18,6 @@ func main() {
 	userPtr := flag.String("user", "", "Rocket.chat user")
 	passPtr := flag.String("pass", "", "Rocket.chat password")
 
-	flag.Parse()
-
 	required := []string{"host", "user", "pass"}
 	flag.Parse()
 
