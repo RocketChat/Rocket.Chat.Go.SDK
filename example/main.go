@@ -18,8 +18,6 @@ func main() {
 	userPtr := flag.String("user", "", "Rocket.chat user")
 	passPtr := flag.String("pass", "", "Rocket.chat password")
 
-	flag.Parse()
-
 	required := []string{"host", "user", "pass"}
 	flag.Parse()
 
@@ -45,6 +43,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	myroom := &models.Channel{Name: "myroom"}
+
+	err = rc.Rest.ChannelsCreate(myroom)
+	if err != nil {
+		log.Println(err)
+	}
+
 	rcChannels, err := rc.Rest.GetPublicChannels()
 	if err != nil {
 		log.Println(err)
@@ -52,6 +57,14 @@ func main() {
 
 	for _, channel := range rcChannels.Channels {
 		fmt.Printf("channel\n\tName:\t%s\n\tID:\t%s\n", channel.Name, channel.ID)
+
+		if channel.Name == "myroom" {
+			closeThisRoom := &models.Channel{ID: channel.ID}
+			err = rc.Rest.ChannelClose(closeThisRoom)
+			if err != nil {
+				log.Println(err)
+			}
+		}
 	}
 
 	general := &models.Channel{ID: "GENERAL", Name: "general"}
