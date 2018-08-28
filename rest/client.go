@@ -1,5 +1,5 @@
-//Package goRocket provides a RocketChat rest client.
-package goRocket
+//Package rest provides a RocketChat rest client.
+package rest
 
 import (
 	"bytes"

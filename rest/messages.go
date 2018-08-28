@@ -1,4 +1,4 @@
-package goRocket
+package rest
 
 import (
 	"bytes"
@@ -9,12 +9,6 @@ import (
 	"strconv"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
-)
-
-const (
-	// RocketChat doesn't send the `added` event for new messages by default, only `changed`.
-	sendAddedEvent    = true
-	defaultBufferSize = 100
 )
 
 // MessagesResponse hold messages

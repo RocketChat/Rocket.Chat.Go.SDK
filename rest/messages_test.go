@@ -1,4 +1,4 @@
-package goRocket
+package rest
 
 import (
 	"errors"

@@ -1,10 +1,8 @@
-package goRocket
+package rest
 
 import (
 	"net/http"
 	"net/url"
-
-	"github.com/gopackage/ddp"
 )
 
 // RocketClient is a generitic client object
@@ -21,9 +19,7 @@ type RocketClient struct {
 
 	auth *authInfo
 
-	ddp    *ddp.Client
 	myDoer Doer
-
 	service
 
 	//Services

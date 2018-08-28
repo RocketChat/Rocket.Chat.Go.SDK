@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/RocketChat/Rocket.Chat.Go.SDK"
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/rest"
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 	debug := false
 
 	credentials := &models.UserCredentials{Email: *userPtr, Password: *passPtr}
-	rc, err := goRocket.NewRestClient(rockerServer, debug)
+	rc, err := rest.NewRestClient(rockerServer, debug)
 	if err != nil {
 		log.Fatal(err)
 	}
