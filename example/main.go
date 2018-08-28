@@ -18,8 +18,6 @@ func main() {
 	userPtr := flag.String("user", "", "Rocket.chat user")
 	passPtr := flag.String("pass", "", "Rocket.chat password")
 
-	flag.Parse()
-
 	required := []string{"host", "user", "pass"}
 	flag.Parse()
 
@@ -56,6 +54,9 @@ func main() {
 
 	general := &models.Channel{ID: "GENERAL", Name: "general"}
 
+	members, _ := rc.Rest.GetMembersList("GENERAL")
+	fmt.Println(members)
+
 	messages, err := rc.Rest.GetMessages(general, &models.Pagination{Count: 5})
 	if err != nil {
 		log.Println(err)
@@ -67,28 +68,28 @@ func main() {
 		fmt.Println("")
 	}
 
-	msgOBJ := models.Attachment{
-		Color:    "#00ff00",
-		Text:     "Yay for the gopher!",
-		ImageURL: "https://ih1.redbubble.net/image.377846240.0222/ap,550x550,12x16,1,transparent,t.png",
-		Title:    "PostMessage Example for Go",
-		Fields: []models.AttachmentField{
-			models.AttachmentField{Short: true, Title: "Get the package", Value: "[Link](https://github.com/RocketChat/Rocket.Chat.Go.SDK) Rocket.Chat.Go.SDK"},
-		},
-	}
+	// msgOBJ := models.Attachment{
+	// 	Color:    "#00ff00",
+	// 	Text:     "Yay for the gopher!",
+	// 	ImageURL: "https://ih1.redbubble.net/image.377846240.0222/ap,550x550,12x16,1,transparent,t.png",
+	// 	Title:    "PostMessage Example for Go",
+	// 	Fields: []models.AttachmentField{
+	// 		models.AttachmentField{Short: true, Title: "Get the package", Value: "[Link](https://github.com/RocketChat/Rocket.Chat.Go.SDK) Rocket.Chat.Go.SDK"},
+	// 	},
+	// }
 
-	msgPOST := models.PostMessage{
-		RoomID:  "GENERAL",
-		Channel: "general",
-		Emoji:   ":smirk:",
-		Text:    "PostMessage API using GoLang works ok",
-		Attachments: []models.Attachment{
-			msgOBJ,
-		},
-	}
+	// msgPOST := models.PostMessage{
+	// 	RoomID:  "GENERAL",
+	// 	Channel: "general",
+	// 	Emoji:   ":smirk:",
+	// 	Text:    "PostMessage API using GoLang works ok",
+	// 	Attachments: []models.Attachment{
+	// 		msgOBJ,
+	// 	},
+	// }
 
-	message, err := rc.Rest.PostMessage(&msgPOST)
-	log.Println(message)
+	//message, err := rc.Rest.PostMessage(&msgPOST)
+	//log.Println(message)
 
 	if err != nil {
 		log.Println(err)

@@ -21,6 +21,13 @@ type ChannelResponse struct {
 	Channel models.Channel `json:"channel"`
 }
 
+// MembersResponse on a single channel
+type MembersResponse struct {
+	Status
+	models.Pagination
+	MembersList []models.Member `json:"members"`
+}
+
 // GetPublicChannels returns all channels that can be seen by the logged in user.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list
@@ -61,6 +68,23 @@ func (c *RestService) LeaveChannel(channel *models.Channel) error {
 	return c.Post("channels.leave", bytes.NewBufferString(body), new(ChannelResponse))
 }
 
+// GetMembersList returns all channels that the user has joined.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/members/
+func (c *RestService) GetMembersList(roomID string) (*MembersResponse, error) {
+
+	params := url.Values{}
+	params.Add("roomId", roomID)
+
+	response := new(MembersResponse)
+
+	if err := c.Get("channels.members", params, response); err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
 // GetChannelInfo get information about a channel. That might be useful to update the usernames.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/info
@@ -69,6 +93,5 @@ func (c *RestService) GetChannelInfo(channel *models.Channel) (*models.Channel, 
 	if err := c.Get("channels.info", url.Values{"roomId": []string{channel.ID}}, response); err != nil {
 		return nil, err
 	}
-
 	return &response.Channel, nil
 }

@@ -276,6 +276,78 @@ func TestRestService_LeaveChannel(t *testing.T) {
 	}
 }
 
+func TestRestService_GetMembersList(t *testing.T) {
+
+	type fields struct {
+		myDoer Doer
+		roomID string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    MembersResponse
+		wantErr error
+	}{
+		{
+			name: "GetMembersList OK",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"members": [
+							{
+								"_id": "Loz7qh9ChSqHMPymx",
+								"username": "customField_apiuser.test.1529436896005",
+								"name": "customField_apiuser.test.1529436896005",
+								"status": "offline"
+							},
+							{
+								"_id": "Zc3Y3cRW7ZtS7Y8Hk",
+								"username": "customField_apiuser.test.1529436997563",
+								"name": "customField_apiuser.test.1529436997563",
+								"status": "offline"
+							}
+						],
+						"count": 2,
+						"offset": 0,
+						"total": 35,
+						"success": true
+					}`,
+				},
+				roomID: "GENERAL",
+			},
+			want: MembersResponse{
+				Status:     Status{Status: "OK"},
+				Pagination: models.Pagination{Count: 2, Offset: 0, Total: 35},
+				MembersList: []models.Member{
+					models.Member{
+						ID:       "Loz7qh9ChSqHMPymx",
+						Username: "customField_apiuser.test.1529436896005",
+						Name:     "customField_apiuser.test.1529436896005",
+						Status:   "offline"},
+					models.Member{
+						ID:       "Zc3Y3cRW7ZtS7Y8Hk",
+						Username: "customField_apiuser.test.1529436997563",
+						Name:     "customField_apiuser.test.1529436997563",
+						Status:   "offline"},
+				},
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rt := CreateTestRestClient(tt.fields.myDoer)
+			got, err := rt.Rest.GetMembersList(tt.fields.roomID)
+
+			assert.Equal(t, tt.wantErr, err, "Unexpected error")
+			assert.Equal(t, tt.want.Count, got.Count, "Member count dose not match")
+			assert.Equal(t, got.MembersList, tt.want.MembersList, "MembersList did not match")
+
+		})
+	}
+}
+
 func TestRestService_GetChannelInfo(t *testing.T) {
 
 	type fields struct {
@@ -363,7 +435,6 @@ func TestRestService_KickChannel(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    models.Channel
 		wantErr error
 	}{
 		{
@@ -397,11 +468,6 @@ func TestRestService_KickChannel(t *testing.T) {
 					User: &models.User{ID: "nSYqWzZ4GsKTX4dyK"},
 				},
 			},
-			want: models.Channel{
-				ID:   "ByehQjC44FwMeiLbX",
-				Name: "invite-me",
-				Type: "c",
-			},
 			wantErr: nil,
 		},
 		{
@@ -419,22 +485,16 @@ func TestRestService_KickChannel(t *testing.T) {
 					User: &models.User{ID: "nSYqWzZ4GsKTX4dyK"},
 				},
 			},
-			want:    models.Channel{},
 			wantErr: errors.New("status: error, message: you must be logged in to do this"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			got, err := rt.Rest.GetChannelInfo(tt.fields.channel)
+			err := rt.Rest.KickChannel(tt.fields.channel)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 
-			if err == nil {
-				assert.NotNil(t, got)
-				assert.Equal(t, got.ID, tt.want.ID, "ID did not match")
-				assert.Equal(t, got.Name, tt.want.Name, "Name did not match")
-			}
 		})
 	}
 }
