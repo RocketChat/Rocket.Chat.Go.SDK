@@ -20,11 +20,11 @@ type Client struct {
 func NewClient(serverUrl *url.URL, debug bool) (*Client, error) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	wsUrl := "ws"
+	wsURL := "ws"
 	port := 80
 
 	if serverUrl.Scheme == "https" {
-		wsUrl = "wss"
+		wsURL = "wss"
 		port = 443
 	}
 
@@ -32,12 +32,12 @@ func NewClient(serverUrl *url.URL, debug bool) (*Client, error) {
 		port, _ = strconv.Atoi(serverUrl.Port())
 	}
 
-	wsUrl = fmt.Sprintf("%s://%v:%v/websocket", wsUrl, serverUrl.Hostname(), port)
+	wsURL = fmt.Sprintf("%s://%v:%v/websocket", wsURL, serverUrl.Hostname(), port)
 
-	log.Println("About to connect to:", wsUrl, port, serverUrl.Scheme)
+	log.Println("About to connect to:", wsURL, port, serverUrl.Scheme)
 
 	c := new(Client)
-	c.ddp = ddp.NewClient(wsUrl, serverUrl.String())
+	c.ddp = ddp.NewClient(wsURL, serverUrl.String())
 
 	if debug {
 		c.ddp.SetSocketLogActive(true)

@@ -14,25 +14,16 @@ import (
 )
 
 var (
-	ResponseErr = fmt.Errorf("got false response")
+	// ErrResponse for general responice errors
+	ErrResponse = fmt.Errorf("got false response")
 )
 
+// Response is everythuing is ok ?
 type Response interface {
 	OK() error
 }
 
-type Client struct {
-	Protocol string
-	Host     string
-	Port     string
-	Version  string
-
-	// Use this switch to see all network communication.
-	Debug bool
-
-	auth *authInfo
-}
-
+// Status ...
 type Status struct {
 	Success bool   `json:"success"`
 	Error   string `json:"error"`
@@ -46,6 +37,7 @@ type authInfo struct {
 	id    string
 }
 
+// OK ...
 func (s Status) OK() error {
 	if s.Success {
 		return nil
@@ -62,7 +54,7 @@ func (s Status) OK() error {
 	if len(s.Message) > 0 {
 		return fmt.Errorf("status: %s, message: %s", s.Status, s.Message)
 	}
-	return ResponseErr
+	return ErrResponse
 }
 
 // StatusResponse The base for the most of the json responses
@@ -71,45 +63,29 @@ type StatusResponse struct {
 	Channel string `json:"channel"`
 }
 
-func NewClient(serverUrl *url.URL, debug bool) *Client {
-	protocol := "http"
-	port := "80"
-
-	if serverUrl.Scheme == "https" {
-		protocol = "https"
-		port = "443"
+func (rest *RestService) getURL() string {
+	if len(rest.client.Version) == 0 {
+		rest.client.Version = "v1"
 	}
-
-	if len(serverUrl.Port()) > 0 {
-		port = serverUrl.Port()
-	}
-
-	return &Client{Host: serverUrl.Hostname(), Port: port, Protocol: protocol, Version: "v1", Debug: debug}
-}
-
-func (c *Client) getUrl() string {
-	if len(c.Version) == 0 {
-		c.Version = "v1"
-	}
-	return fmt.Sprintf("%v://%v:%v/api/%s", c.Protocol, c.Host, c.Port, c.Version)
+	return fmt.Sprintf("%v://%v:%v/api/%s", rest.client.Protocol, rest.client.Host, rest.client.Port, rest.client.Version)
 }
 
 // Get call Get
-func (c *Client) Get(api string, params url.Values, response Response) error {
-	return c.doRequest(http.MethodGet, api, params, nil, response)
+func (rest *RestService) Get(api string, params url.Values, response Response) error {
+	return rest.doRequest(http.MethodGet, api, params, nil, response)
 }
 
 // Post call as JSON
-func (c *Client) Post(api string, body io.Reader, response Response) error {
-	return c.doRequest(http.MethodPost, api, nil, body, response)
+func (rest *RestService) Post(api string, body io.Reader, response Response) error {
+	return rest.doRequest(http.MethodPost, api, nil, body, response)
 }
 
 // PostForm call as Form Data
-func (c *Client) PostForm(api string, params url.Values, response Response) error {
-	return c.doRequest(http.MethodPost, api, params, nil, response)
+func (rest *RestService) PostForm(api string, params url.Values, response Response) error {
+	return rest.doRequest(http.MethodPost, api, params, nil, response)
 }
 
-func (c *Client) doRequest(method, api string, params url.Values, body io.Reader, response Response) error {
+func (rest *RestService) doRequest(method, api string, params url.Values, body io.Reader, response Response) error {
 	contentType := "application/x-www-form-urlencoded"
 	if method == http.MethodPost {
 		if body != nil {
@@ -119,7 +95,7 @@ func (c *Client) doRequest(method, api string, params url.Values, body io.Reader
 		}
 	}
 
-	request, err := http.NewRequest(method, c.getUrl()+"/"+api, body)
+	request, err := http.NewRequest(method, rest.getURL()+"/"+api, body)
 	if err != nil {
 		return err
 	}
@@ -132,16 +108,16 @@ func (c *Client) doRequest(method, api string, params url.Values, body io.Reader
 		request.Header.Set("Content-Type", contentType)
 	}
 
-	if c.auth != nil {
-		request.Header.Set("X-Auth-Token", c.auth.token)
-		request.Header.Set("X-User-Id", c.auth.id)
+	if rest.client.auth != nil {
+		request.Header.Set("X-Auth-Token", rest.client.auth.token)
+		request.Header.Set("X-User-Id", rest.client.auth.id)
 	}
 
-	if c.Debug {
+	if rest.client.Debug {
 		log.Println(request)
 	}
 
-	resp, err := http.DefaultClient.Do(request)
+	resp, err := rest.client.myDoer.Do(request)
 
 	if err != nil {
 		return err
@@ -150,7 +126,7 @@ func (c *Client) doRequest(method, api string, params url.Values, body io.Reader
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 
-	if c.Debug {
+	if rest.client.Debug {
 		log.Println(string(bodyBytes))
 	}
 

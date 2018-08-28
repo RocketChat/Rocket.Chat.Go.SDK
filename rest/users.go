@@ -2,7 +2,7 @@ package rest
 
 import (
 	"bytes"
-	"net/url"
+	"encoding/json"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
@@ -25,23 +25,30 @@ type logonResponse struct {
 // Login a user. The Email and the Password are mandatory. The auth token of the user is stored in the Client instance.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/authentication/login
-func (c *Client) Login(credentials *models.UserCredentials) error {
-	if c.auth != nil {
+func (c *RestService) Login(credentials *models.UserCredentials) error {
+	if c.client.auth != nil {
 		return nil
 	}
 
 	if credentials.ID != "" && credentials.Token != "" {
-		c.auth = &authInfo{id: credentials.ID, token: credentials.Token}
+		c.client.auth = &authInfo{id: credentials.ID, token: credentials.Token}
 		return nil
 	}
 
 	response := new(logonResponse)
-	data := url.Values{"user": {credentials.Email}, "password": {credentials.Password}}
-	if err := c.Post("login", bytes.NewBufferString(data.Encode()), response); err != nil {
+
+	type userlogin struct {
+		UserName string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	data, _ := json.Marshal(userlogin{UserName: credentials.Email, Password: credentials.Password})
+
+	if err := c.Post("login", bytes.NewBuffer(data), response); err != nil {
 		return err
 	}
 
-	c.auth = &authInfo{id: response.Data.UserID, token: response.Data.Token}
+	c.client.auth = &authInfo{id: response.Data.UserID, token: response.Data.Token}
 	credentials.ID, credentials.Token = response.Data.UserID, response.Data.Token
 	return nil
 }
@@ -49,9 +56,9 @@ func (c *Client) Login(credentials *models.UserCredentials) error {
 // Logout a user. The function returns the response message of the server.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/authentication/logout
-func (c *Client) Logout() (string, error) {
+func (c *RestService) Logout() (string, error) {
 
-	if c.auth == nil {
+	if c.client.auth == nil {
 		return "Was not logged in", nil
 	}
 
