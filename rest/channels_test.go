@@ -585,3 +585,53 @@ func TestRestService_ChannelsCreate(t *testing.T) {
 		})
 	}
 }
+
+func TestRestService_ChannelClose(t *testing.T) {
+
+	type fields struct {
+		myDoer  Doer
+		channel *models.Channel
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr error
+	}{
+		{
+			name: "ChannelClose OK",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"success": true
+					 }`,
+				},
+				channel: &models.Channel{ID: "ByehQjC44FwMeiLbX"},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "ChannelClose Err",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"status": "error",
+						"message": "you must be logged in to do this"
+					  }`,
+				},
+				channel: &models.Channel{ID: "ByehQjC44FwMeiLbX"},
+			},
+			wantErr: errors.New("status: error, message: you must be logged in to do this"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rt := CreateTestRestClient(tt.fields.myDoer)
+			err := rt.Rest.ChannelClose(tt.fields.channel)
+
+			assert.Equal(t, err, tt.wantErr, "Unexpected error")
+
+		})
+	}
+}
