@@ -37,3 +37,20 @@ type ChannelSubscription struct {
 	Roles       []string `json:"roles"`
 	Unread      float64  `json:"unread"`
 }
+
+//MembersList members in a channel
+type MembersList struct {
+	Members []Member `json:"members"`
+	Count   int      `json:"count"`
+	Offset  int      `json:"offset"`
+	Total   int      `json:"total"`
+	Success bool     `json:"success"`
+}
+
+// Member ...
+type Member struct {
+	ID       string `json:"_id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	Status   string `json:"status"`
+}
