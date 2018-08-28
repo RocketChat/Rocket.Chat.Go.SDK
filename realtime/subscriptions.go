@@ -7,7 +7,7 @@ import (
 	"github.com/gopackage/ddp"
 )
 
-// Subscribes to stream-notify-logged
+// Sub subscribes to stream-notify-logged
 // Returns a buffered channel
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/subscriptions/stream-room-messages/

@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// Info ...
 type Info struct {
 	Version string `json:"version"`
 
@@ -22,12 +23,14 @@ type Info struct {
 	} `json:"commit"`
 }
 
+// Pagination ...
 type Pagination struct {
 	Count  int `json:"count"`
 	Offset int `json:"offset"`
 	Total  int `json:"total"`
 }
 
+// Directory ...
 type Directory struct {
 	Result []struct {
 		ID        string    `json:"_id"`
@@ -43,11 +46,13 @@ type Directory struct {
 	Pagination
 }
 
+// Spotlight ...
 type Spotlight struct {
 	Users []User    `json:"users"`
 	Rooms []Channel `json:"rooms"`
 }
 
+// Statistics ...
 type Statistics struct {
 	ID       string `json:"_id"`
 	UniqueID string `json:"uniqueId"`
@@ -122,10 +127,12 @@ type Statistics struct {
 	UpdatedAt     time.Time `json:"_updatedAt"`
 }
 
+// StatisticsInfo ...
 type StatisticsInfo struct {
 	Statistics Statistics `json:"statistics"`
 }
 
+// StatisticsList ...
 type StatisticsList struct {
 	Statistics []Statistics `json:"statistics"`
 
