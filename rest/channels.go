@@ -29,6 +29,14 @@ func (c *RestService) ChannelArchive(channel *models.Channel) error {
 	return c.Post("channels.archive", bytes.NewBufferString(body), new(ChannelResponse))
 }
 
+// ChannelUnarchive Unarchives a channel.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/unarchive
+func (c *RestService) ChannelUnarchive(channel *models.Channel) error {
+	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
+	return c.Post("channels.unarchive", bytes.NewBufferString(body), new(ChannelResponse))
+}
+
 // GetPublicChannels returns all channels that can be seen by the logged in user.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list
