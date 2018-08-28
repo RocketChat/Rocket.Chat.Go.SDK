@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,7 +32,7 @@ func getDefaultClient(t *testing.T) *RocketClient {
 // nolint is unused
 func getAuthenticatedClient(t *testing.T, name, email, password string) *RocketClient {
 	client := RocketClient{Protocol: Protocol, Host: Host, Port: Port}
-	credentials := &UserCredentials{Name: name, Email: email, Password: password}
+	credentials := &models.UserCredentials{Name: name, Email: email, Password: password}
 
 	rtClient, err := NewLiveClient(&url.URL{Host: Host + ":" + Port}, true)
 	assert.Nil(t, err)
@@ -45,8 +46,8 @@ func getAuthenticatedClient(t *testing.T, name, email, password string) *RocketC
 }
 
 // nolint - deadcode !
-func findMessage(messages []Message, user string, msg string) *Message {
-	var m *Message
+func findMessage(messages []models.Message, user string, msg string) *models.Message {
+	var m *models.Message
 	for i := range messages {
 		m = &messages[i]
 		if m.User.UserName == user && m.Msg == msg {
@@ -58,7 +59,7 @@ func findMessage(messages []Message, user string, msg string) *Message {
 }
 
 // nolint - deadcode !
-func getChannel(channels []Channel, name string) *Channel {
+func getChannel(channels []models.Channel, name string) *models.Channel {
 	for _, r := range channels {
 		if r.Name == name {
 			return &r

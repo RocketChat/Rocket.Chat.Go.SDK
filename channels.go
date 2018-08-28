@@ -7,19 +7,20 @@ import (
 	"net/url"
 
 	"github.com/Jeffail/gabs"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 // ChannelsResponse used when returning channel lists
 type ChannelsResponse struct {
 	Status
-	Pagination
-	Channels []Channel `json:"channels"`
+	models.Pagination
+	Channels []models.Channel `json:"channels"`
 }
 
 // ChannelResponse on a single channel
 type ChannelResponse struct {
 	Status
-	Channel Channel `json:"channel"`
+	Channel models.Channel `json:"channel"`
 }
 
 // GetPublicChannels returns all channels that can be seen by the logged in user.
@@ -49,7 +50,7 @@ func (c *RestService) GetJoinedChannels(params url.Values) (*ChannelsResponse, e
 // LeaveChannel leaves a channel. The id of the channel has to be not nil.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/leave
-func (c *RestService) LeaveChannel(channel *Channel) error {
+func (c *RestService) LeaveChannel(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
 	return c.Post("channels.leave", bytes.NewBufferString(body), new(ChannelResponse))
 }
@@ -57,7 +58,7 @@ func (c *RestService) LeaveChannel(channel *Channel) error {
 // GetChannelInfo get information about a channel. That might be useful to update the usernames.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/info
-func (c *RestService) GetChannelInfo(channel *Channel) (*Channel, error) {
+func (c *RestService) GetChannelInfo(channel *models.Channel) (*models.Channel, error) {
 	response := new(ChannelResponse)
 	if err := c.Get("channels.info", url.Values{"roomId": []string{channel.ID}}, response); err != nil {
 		return nil, err
@@ -82,7 +83,7 @@ func (c *LiveService) GetChannelID(name string) (string, error) {
 // Optionally includes date to get all since last check or 0 to get all
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-rooms/
-func (c *LiveService) GetChannelsIn() ([]Channel, error) {
+func (c *LiveService) GetChannelsIn() ([]models.Channel, error) {
 	rawResponse, err := c.client.ddp.Call("rooms/get", map[string]int{
 		"$date": 0,
 	})
@@ -97,10 +98,10 @@ func (c *LiveService) GetChannelsIn() ([]Channel, error) {
 		log.Println(err)
 	}
 
-	var channels []Channel
+	var channels []models.Channel
 
 	for _, i := range chans {
-		channels = append(channels, Channel{
+		channels = append(channels, models.Channel{
 			ID: stringOrZero(i.Path("_id").Data()),
 			//Default: stringOrZero(i.Path("default").Data()),
 			Name: stringOrZero(i.Path("name").Data()),
@@ -115,7 +116,7 @@ func (c *LiveService) GetChannelsIn() ([]Channel, error) {
 // Optionally includes date to get all since last check or 0 to get all
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-subscriptions
-func (c *LiveService) GetChannelSubscriptions() ([]ChannelSubscription, error) {
+func (c *LiveService) GetChannelSubscriptions() ([]models.ChannelSubscription, error) {
 	rawResponse, err := c.client.ddp.Call("subscriptions/get", map[string]int{
 		"$date": 0,
 	})
@@ -133,17 +134,17 @@ func (c *LiveService) GetChannelSubscriptions() ([]ChannelSubscription, error) {
 		log.Println(err)
 	}
 
-	var channelSubscriptions []ChannelSubscription
+	var channelSubscriptions []models.ChannelSubscription
 
 	for _, sub := range channelSubs {
-		channelSubscription := ChannelSubscription{
+		channelSubscription := models.ChannelSubscription{
 			ID:          stringOrZero(sub.Path("_id").Data()),
 			Alert:       sub.Path("alert").Data().(bool),
 			Name:        stringOrZero(sub.Path("name").Data()),
 			DisplayName: stringOrZero(sub.Path("fname").Data()),
 			Open:        sub.Path("open").Data().(bool),
 			Type:        stringOrZero(sub.Path("t").Data()),
-			User: User{
+			User: models.User{
 				ID:       stringOrZero(sub.Path("u._id").Data()),
 				UserName: stringOrZero(sub.Path("u.username").Data()),
 			},

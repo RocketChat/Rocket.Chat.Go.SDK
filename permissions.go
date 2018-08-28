@@ -4,12 +4,13 @@ import (
 	"log"
 
 	"github.com/Jeffail/gabs"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 // GetPermissions gets permissions
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-permissions
-func (c *LiveService) GetPermissions() ([]Permission, error) {
+func (c *LiveService) GetPermissions() ([]models.Permission, error) {
 	rawResponse, err := c.client.ddp.Call("permissions/get")
 	if err != nil {
 		return nil, err
@@ -19,7 +20,7 @@ func (c *LiveService) GetPermissions() ([]Permission, error) {
 
 	perms, _ := document.Children()
 
-	var permissions []Permission
+	var permissions []models.Permission
 
 	for _, permission := range perms {
 		var roles []string
@@ -27,7 +28,7 @@ func (c *LiveService) GetPermissions() ([]Permission, error) {
 			roles = append(roles, role.(string))
 		}
 
-		permissions = append(permissions, Permission{
+		permissions = append(permissions, models.Permission{
 			ID:    stringOrZero(permission.Path("_id").Data()),
 			Roles: roles,
 		})

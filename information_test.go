@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +17,7 @@ func TestRocket_GetServerInfo(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    Info
+		want    models.Info
 		wantErr error
 	}{
 		{
@@ -46,7 +47,7 @@ func TestRocket_GetServerInfo(t *testing.T) {
 					  }`,
 				},
 			},
-			want: Info{
+			want: models.Info{
 				Version: "0.47.0-develop",
 			},
 			wantErr: nil,
@@ -61,7 +62,7 @@ func TestRocket_GetServerInfo(t *testing.T) {
 					  }`,
 				},
 			},
-			want: Info{
+			want: models.Info{
 				Version: "0.47.0-develop",
 			},
 			wantErr: errors.New("got false response"),
@@ -90,7 +91,7 @@ func TestRocket_GetDirectory(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    Directory
+		want    models.Directory
 		wantErr error
 	}{
 		{
@@ -143,8 +144,8 @@ func TestRocket_GetDirectory(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`{"text": "gene", "type": "channels"}`}},
 			},
-			want: Directory{
-				Pagination: Pagination{Count: 1, Offset: 0, Total: 1},
+			want: models.Directory{
+				Pagination: models.Pagination{Count: 1, Offset: 0, Total: 1},
 			},
 			wantErr: nil,
 		},
@@ -182,8 +183,8 @@ func TestRocket_GetDirectory(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`{"text": "rocket", "type": "users"}`}},
 			},
-			want: Directory{
-				Pagination: Pagination{Count: 2, Offset: 0, Total: 2},
+			want: models.Directory{
+				Pagination: models.Pagination{Count: 2, Offset: 0, Total: 2},
 			},
 			wantErr: nil,
 		},
@@ -221,7 +222,7 @@ func TestRocket_GetDirectory(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`{"text": "rocket", "type": "users"}`}},
 			},
-			want:    Directory{},
+			want:    models.Directory{},
 			wantErr: errors.New("got false response"),
 		},
 	}
@@ -253,7 +254,7 @@ func TestRocket_GetSpotlight(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    Spotlight
+		want    models.Spotlight
 		wantErr error
 	}{
 		{
@@ -276,9 +277,9 @@ func TestRocket_GetSpotlight(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`#foobar`}},
 			},
-			want: Spotlight{
-				Users: []User{
-					User{
+			want: models.Spotlight{
+				Users: []models.User{
+					models.User{
 						ID:           "rocket.cat",
 						Name:         "Rocket.Cat",
 						UserName:     "rocket.cat",
@@ -286,7 +287,7 @@ func TestRocket_GetSpotlight(t *testing.T) {
 						Token:        "",
 						TokenExpires: 0},
 				},
-				Rooms: []Channel{},
+				Rooms: []models.Channel{},
 			},
 			wantErr: nil,
 		},
@@ -310,7 +311,7 @@ func TestRocket_GetSpotlight(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`#foobar`}},
 			},
-			want:    Spotlight{},
+			want:    models.Spotlight{},
 			wantErr: errors.New("got false response"),
 		},
 	}
@@ -340,7 +341,7 @@ func TestRocket_GetStatistics(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    StatisticsInfo
+		want    models.StatisticsInfo
 		wantErr error
 	}{
 		{
@@ -455,8 +456,8 @@ func TestRocket_GetStatistics(t *testing.T) {
 					  }`,
 				},
 			},
-			want: StatisticsInfo{
-				Statistics: Statistics{
+			want: models.StatisticsInfo{
+				Statistics: models.Statistics{
 					Version:    "0.61.0-develop",
 					TotalUsers: 88,
 				},
@@ -475,8 +476,8 @@ func TestRocket_GetStatistics(t *testing.T) {
 					}`,
 				},
 			},
-			want: StatisticsInfo{
-				Statistics: Statistics{},
+			want: models.StatisticsInfo{
+				Statistics: models.Statistics{},
 			},
 			wantErr: errors.New("Not allowed [error-not-allowed]"),
 		},
@@ -514,7 +515,7 @@ func TestRocket_GetStatisticsList(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    StatisticsList
+		want    models.StatisticsList
 		wantErr error
 	}{
 		{
@@ -561,16 +562,16 @@ func TestRocket_GetStatisticsList(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`{"_id" : "zT26ye8RAM7MaEN7S"}`}},
 			},
-			want: StatisticsList{
-				Statistics: []Statistics{
-					Statistics{
+			want: models.StatisticsList{
+				Statistics: []models.Statistics{
+					models.Statistics{
 						ID:          "v3D4mvobwfznKozH8",
 						UniqueID:    "wD4EP3M7FeFzJZgk9",
 						ActiveUsers: 88,
 						TotalRooms:  81,
 					},
 				},
-				Pagination: Pagination{Count: 2, Offset: 0, Total: 2},
+				Pagination: models.Pagination{Count: 2, Offset: 0, Total: 2},
 			},
 			wantErr: nil,
 		},
@@ -618,7 +619,7 @@ func TestRocket_GetStatisticsList(t *testing.T) {
 				},
 				params: url.Values{"query": []string{`{"_id" : "zT26ye8RAM7MaEN7S"}`}},
 			},
-			want:    StatisticsList{},
+			want:    models.StatisticsList{},
 			wantErr: errors.New("got false response"),
 		},
 	}

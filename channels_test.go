@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -66,9 +67,9 @@ func TestRestService_GetPublicChannels(t *testing.T) {
 				},
 			},
 			want: ChannelsResponse{
-				Channels: []Channel{
-					Channel{ID: "ByehQjC44FwMeiLbX", Name: "test-test"},
-					Channel{ID: "t7qapfhZjANMRAi5w", Name: "testing"},
+				Channels: []models.Channel{
+					models.Channel{ID: "ByehQjC44FwMeiLbX", Name: "test-test"},
+					models.Channel{ID: "t7qapfhZjANMRAi5w", Name: "testing"},
 				},
 			},
 			wantErr: nil,
@@ -85,8 +86,8 @@ func TestRestService_GetPublicChannels(t *testing.T) {
 				},
 			},
 			want: ChannelsResponse{
-				Channels: []Channel{
-					Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
+				Channels: []models.Channel{
+					models.Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
 				},
 			},
 			wantErr: errors.New("status: error, message: you must be logged in to do this"),
@@ -155,8 +156,8 @@ func TestRestService_GetJoinedChannels(t *testing.T) {
 				params: url.Values{},
 			},
 			want: ChannelsResponse{
-				Channels: []Channel{
-					Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
+				Channels: []models.Channel{
+					models.Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
 				},
 			},
 			wantErr: nil,
@@ -174,8 +175,8 @@ func TestRestService_GetJoinedChannels(t *testing.T) {
 				params: url.Values{},
 			},
 			want: ChannelsResponse{
-				Channels: []Channel{
-					Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
+				Channels: []models.Channel{
+					models.Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
 				},
 			},
 			wantErr: errors.New("status: error, message: you must be logged in to do this"),
@@ -202,7 +203,7 @@ func TestRestService_LeaveChannel(t *testing.T) {
 
 	type fields struct {
 		myDoer  Doer
-		channel *Channel
+		channel *models.Channel
 	}
 	tests := []struct {
 		name    string
@@ -236,11 +237,11 @@ func TestRestService_LeaveChannel(t *testing.T) {
 						"success": true
 					  }`,
 				},
-				channel: &Channel{ID: "GENERAL"},
+				channel: &models.Channel{ID: "GENERAL"},
 			},
 			want: ChannelsResponse{
-				Channels: []Channel{
-					Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
+				Channels: []models.Channel{
+					models.Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
 				},
 			},
 			wantErr: nil,
@@ -255,11 +256,11 @@ func TestRestService_LeaveChannel(t *testing.T) {
 						"message": "you must be logged in to do this"
 					  }`,
 				},
-				channel: &Channel{ID: "GENERAL"},
+				channel: &models.Channel{ID: "GENERAL"},
 			},
 			want: ChannelsResponse{
-				Channels: []Channel{
-					Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
+				Channels: []models.Channel{
+					models.Channel{ID: "ByehQjC44FwMeiLbX", Name: "invite-me"},
 				},
 			},
 			wantErr: errors.New("status: error, message: you must be logged in to do this"),
@@ -279,12 +280,12 @@ func TestRestService_GetChannelInfo(t *testing.T) {
 
 	type fields struct {
 		myDoer  Doer
-		channel *Channel
+		channel *models.Channel
 	}
 	tests := []struct {
 		name    string
 		fields  fields
-		want    Channel
+		want    models.Channel
 		wantErr error
 	}{
 		{
@@ -311,9 +312,9 @@ func TestRestService_GetChannelInfo(t *testing.T) {
 						"success": true
 					  }`,
 				},
-				channel: &Channel{ID: "GENERAL"},
+				channel: &models.Channel{ID: "GENERAL"},
 			},
-			want: Channel{
+			want: models.Channel{
 				ID:   "ByehQjC44FwMeiLbX",
 				Name: "testing",
 				Type: "c",
@@ -330,9 +331,9 @@ func TestRestService_GetChannelInfo(t *testing.T) {
 						"message": "you must be logged in to do this"
 					  }`,
 				},
-				channel: &Channel{ID: "GENERAL"},
+				channel: &models.Channel{ID: "GENERAL"},
 			},
-			want:    Channel{},
+			want:    models.Channel{},
 			wantErr: errors.New("status: error, message: you must be logged in to do this"),
 		},
 	}

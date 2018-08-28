@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,7 +12,7 @@ func TestRocket_Send(t *testing.T) {
 
 	type fields struct {
 		myDoer  Doer
-		channel *Channel
+		channel *models.Channel
 		msg     string
 	}
 	tests := []struct {
@@ -44,7 +45,7 @@ func TestRocket_Send(t *testing.T) {
 						"success": true
 					  }`,
 				},
-				channel: &Channel{ID: "GENERAL"},
+				channel: &models.Channel{ID: "GENERAL"},
 				msg:     "This is a test!",
 			},
 			wantErr: nil,
@@ -59,7 +60,7 @@ func TestRocket_Send(t *testing.T) {
 						"message": "got false response"
 					  }`,
 				},
-				channel: &Channel{ID: "GENERAL"},
+				channel: &models.Channel{ID: "GENERAL"},
 			},
 			wantErr: errors.New("got false response"),
 		},
@@ -79,7 +80,7 @@ func TestRocket_PostMessage(t *testing.T) {
 
 	type fields struct {
 		myDoer Doer
-		msg    *PostMessage
+		msg    *models.PostMessage
 	}
 	tests := []struct {
 		name    string
@@ -112,7 +113,7 @@ func TestRocket_PostMessage(t *testing.T) {
 						"success": true
 					  }`,
 				},
-				msg: &PostMessage{
+				msg: &models.PostMessage{
 					RoomID:  "",
 					Channel: "",
 					Text:    "",
@@ -120,7 +121,7 @@ func TestRocket_PostMessage(t *testing.T) {
 			},
 			want: &MessageResponse{
 				Status:  Status{Success: true, Status: "", Message: ""},
-				Message: Message{RoomID: "GENERAL", Msg: "This is a test!"},
+				Message: models.Message{RoomID: "GENERAL", Msg: "This is a test!"},
 			},
 			wantErr: nil,
 		},
@@ -134,7 +135,7 @@ func TestRocket_PostMessage(t *testing.T) {
 						"message": "got false response"
 					  }`,
 				},
-				msg: &PostMessage{},
+				msg: &models.PostMessage{},
 			},
 			want:    &MessageResponse{},
 			wantErr: errors.New("got false response"),
@@ -164,13 +165,13 @@ func TestRocket_GetMessages(t *testing.T) {
 
 	type fields struct {
 		myDoer  Doer
-		channel *Channel
-		page    *Pagination
+		channel *models.Channel
+		page    *models.Pagination
 	}
 	tests := []struct {
 		name    string
 		fields  fields
-		want    []Message
+		want    []models.Message
 		wantErr error
 	}{
 		{
@@ -234,14 +235,14 @@ func TestRocket_GetMessages(t *testing.T) {
 						"success": true
 					  }`,
 				},
-				channel: &Channel{ID: "GENERAL"},
-				page:    &Pagination{Count: 1, Offset: 0, Total: 1},
+				channel: &models.Channel{ID: "GENERAL"},
+				page:    &models.Pagination{Count: 1, Offset: 0, Total: 1},
 			},
-			want: []Message{
-				Message{ID: "AkzpHAvZpdnuchw2a", RoomID: "ByehQjC44FwMeiLbX", Msg: "hi"},
-				Message{ID: "vkLMxcctR4MuTxreF", RoomID: "ByehQjC44FwMeiLbX", Msg: "testing2"},
-				Message{ID: "bfRW658nEyEBg75rc", RoomID: "ByehQjC44FwMeiLbX", Msg: "testing"},
-				Message{ID: "pbuFiGadhRZTKouhB", RoomID: "ByehQjC44FwMeiLbX", Msg: "testing"},
+			want: []models.Message{
+				models.Message{ID: "AkzpHAvZpdnuchw2a", RoomID: "ByehQjC44FwMeiLbX", Msg: "hi"},
+				models.Message{ID: "vkLMxcctR4MuTxreF", RoomID: "ByehQjC44FwMeiLbX", Msg: "testing2"},
+				models.Message{ID: "bfRW658nEyEBg75rc", RoomID: "ByehQjC44FwMeiLbX", Msg: "testing"},
+				models.Message{ID: "pbuFiGadhRZTKouhB", RoomID: "ByehQjC44FwMeiLbX", Msg: "testing"},
 			},
 			wantErr: nil,
 		},
@@ -255,10 +256,10 @@ func TestRocket_GetMessages(t *testing.T) {
 						"message": "got false response"
 					  }`,
 				},
-				channel: &Channel{ID: "GENERAL"},
-				page:    &Pagination{Count: 1, Offset: 0, Total: 1},
+				channel: &models.Channel{ID: "GENERAL"},
+				page:    &models.Pagination{Count: 1, Offset: 0, Total: 1},
 			},
-			want:    []Message{},
+			want:    []models.Message{},
 			wantErr: errors.New("status: error, message: got false response"),
 		},
 	}

@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// Channel ...
 type Channel struct {
 	ID    string `json:"_id"`
 	Name  string `json:"name"`
@@ -25,6 +26,7 @@ type Channel struct {
 	// } `json:"customFields,omitempty"`
 }
 
+// ChannelSubscription ...
 type ChannelSubscription struct {
 	ID          string   `json:"_id"`
 	Alert       bool     `json:"alert"`

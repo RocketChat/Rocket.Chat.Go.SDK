@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/Jeffail/gabs"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 type logoutResponse struct {
@@ -28,7 +29,7 @@ type logonResponse struct {
 // Login a user. The Email and the Password are mandatory. The auth token of the user is stored in the Client instance.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/authentication/login
-func (c *RestService) Login(credentials *UserCredentials) error {
+func (c *RestService) Login(credentials *models.UserCredentials) error {
 	if c.client.auth != nil {
 		return nil
 	}
@@ -93,7 +94,7 @@ type ddpPassword struct {
 
 // RegisterUser a new user on the server. This function does not need a logged in user. The registered user gets logged in
 // to set its username.
-func (c *LiveService) RegisterUser(credentials *UserCredentials) (*User, error) {
+func (c *LiveService) RegisterUser(credentials *models.UserCredentials) (*models.User, error) {
 
 	if _, err := c.client.ddp.Call("registerUser", credentials); err != nil {
 		return nil, err
@@ -115,7 +116,7 @@ func (c *LiveService) RegisterUser(credentials *UserCredentials) (*User, error) 
 // token shouldn't be nil, otherwise the password and the email are not allowed to be nil.
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/login/
-func (c *LiveService) Login(credentials *UserCredentials) (*User, error) {
+func (c *LiveService) Login(credentials *models.UserCredentials) (*models.User, error) {
 	var request interface{}
 	if credentials.Token != "" {
 		request = ddpTokenLoginRequest{
@@ -145,11 +146,11 @@ func (c *LiveService) Login(credentials *UserCredentials) (*User, error) {
 	return user, nil
 }
 
-func getUserFromData(data interface{}) *User {
+func getUserFromData(data interface{}) *models.User {
 	document, _ := gabs.Consume(data)
 
 	expires, _ := strconv.ParseFloat(stringOrZero(document.Path("tokenExpires.$date").Data()), 64)
-	return &User{
+	return &models.User{
 		ID:           stringOrZero(document.Path("id").Data()),
 		Token:        stringOrZero(document.Path("token").Data()),
 		TokenExpires: int64(expires),
