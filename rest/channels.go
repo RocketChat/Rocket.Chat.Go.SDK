@@ -28,6 +28,14 @@ type MembersResponse struct {
 	MembersList []models.Member `json:"members"`
 }
 
+// ChannelArchive Archives a channel.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/archive
+func (c *Client) ChannelArchive(channel *models.Channel) error {
+	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
+	return c.Post("channels.archive", bytes.NewBufferString(body), new(ChannelResponse))
+}
+
 // GetPublicChannels returns all channels that can be seen by the logged in user.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list

@@ -12,6 +12,55 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestRestService_ChannelArchivel(t *testing.T) {
+
+	type fields struct {
+		myDoer  Doer
+		channel *models.Channel
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr error
+	}{
+		{
+			name: "ChannelArchive OK",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"success": true
+					 }`,
+				},
+				channel: &models.Channel{ID: "GENERAL"},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "ChannelArchive Err",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"status": "error",
+						"message": "you must be logged in to do this"
+					  }`,
+				},
+				channel: &models.Channel{ID: "GENERAL"},
+			},
+			wantErr: errors.New("status: error, message: you must be logged in to do this"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rt := CreateTestRestClient(tt.fields.myDoer)
+			err := rt.Rest.ChannelArchive(tt.fields.channel)
+
+			assert.Equal(t, err, tt.wantErr, "Unexpected error")
+		})
+	}
+}
+
 func TestRestService_GetPublicChannels(t *testing.T) {
 
 	type fields struct {
