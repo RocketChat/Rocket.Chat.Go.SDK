@@ -1,6 +1,6 @@
 package models
 
-// UserCredentials ...
+// UserCredentials model
 type UserCredentials struct {
 	ID    string `json:"id"`
 	Token string `json:"token"`
