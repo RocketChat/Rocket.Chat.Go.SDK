@@ -21,6 +21,14 @@ type ChannelResponse struct {
 	Channel models.Channel `json:"channel"`
 }
 
+// ChannelArchive Archives a channel.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/archive
+func (c *RestService) ChannelArchive(channel *models.Channel) error {
+	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
+	return c.Post("channels.archive", bytes.NewBufferString(body), new(ChannelResponse))
+}
+
 // GetPublicChannels returns all channels that can be seen by the logged in user.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list
