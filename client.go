@@ -9,7 +9,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/url"
 )
@@ -149,52 +148,4 @@ func (rest *RestService) doRequest(method, api string, params url.Values, body i
 	}
 
 	return response.OK()
-}
-
-type statusListener struct {
-	listener func(int)
-}
-
-func (s statusListener) Status(status int) {
-	s.listener(status)
-}
-
-// AddStatusListener ...
-func (c *LiveService) AddStatusListener(listener func(int)) {
-	c.client.ddp.AddStatusListener(statusListener{listener: listener})
-}
-
-// Reconnect ...
-func (c *LiveService) Reconnect() {
-	c.client.ddp.Reconnect()
-}
-
-// ConnectionAway sets connection status to away
-func (c *LiveService) ConnectionAway() error {
-	_, err := c.client.ddp.Call("UserPresence:away")
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ConnectionOnline sets connection status to online
-func (c *LiveService) ConnectionOnline() error {
-	_, err := c.client.ddp.Call("UserPresence:online")
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Close closes the ddp session
-func (c *LiveService) Close() {
-	c.client.ddp.Close()
-}
-
-// Some of the rocketchat objects need unique IDs specified by the client
-func (c *LiveService) newRandomID() string {
-	return fmt.Sprintf("%f", rand.Float64())
 }

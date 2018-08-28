@@ -1,12 +1,8 @@
 package goRocket
 
 import (
-	"fmt"
-	"log"
-	"math/rand"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/gopackage/ddp"
 )
@@ -32,7 +28,6 @@ type RocketClient struct {
 
 	//Services
 	Rest *RestService
-	Live *LiveService
 }
 
 type service struct {
@@ -41,9 +36,6 @@ type service struct {
 
 // RestService rest API service
 type RestService service
-
-// LiveService live API service
-type LiveService service
 
 // Doer to make testing easer !
 type Doer interface {
@@ -76,42 +68,6 @@ func NewRestClient(serverURL *url.URL, debug bool) (*RocketClient, error) {
 	r.Host = serverURL.Hostname()
 
 	r.Rest = (*RestService)(&r.service)
-
-	return &r, nil
-}
-
-// NewLiveClient a new instance and connects to the websocket.
-func NewLiveClient(serverURL *url.URL, debug bool) (*RocketClient, error) {
-	rand.Seed(time.Now().UTC().UnixNano())
-
-	r := RocketClient{}
-	wsURL := "ws"
-	port := "80"
-
-	if serverURL.Scheme == "https" {
-		wsURL = "wss"
-		port = "443"
-	}
-
-	if len(serverURL.Port()) > 0 {
-		port = serverURL.Port()
-	}
-
-	wsURL = fmt.Sprintf("%s://%v:%v/websocket", wsURL, serverURL.Hostname(), port)
-
-	r.Live = (*LiveService)(&r.service)
-
-	log.Println("About to connect to:", wsURL, port, serverURL.Scheme)
-
-	r.ddp = ddp.NewClient(wsURL, serverURL.String())
-
-	if debug {
-		r.ddp.SetSocketLogActive(true)
-	}
-
-	if err := r.ddp.Connect(); err != nil {
-		return nil, err
-	}
 
 	return &r, nil
 }

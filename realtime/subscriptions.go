@@ -1,4 +1,4 @@
-package goRocket
+package realtime
 
 import (
 	"fmt"
@@ -11,21 +11,21 @@ import (
 // Returns a buffered channel
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/subscriptions/stream-room-messages/
-func (c *LiveService) Sub(name string, args ...interface{}) (chan string, error) {
+func (c *Client) Sub(name string, args ...interface{}) (chan string, error) {
 
 	if args == nil {
 		log.Println("no args passed")
-		if err := c.client.ddp.Sub(name); err != nil {
+		if err := c.ddp.Sub(name); err != nil {
 			return nil, err
 		}
 	} else {
-		if err := c.client.ddp.Sub(name, args[0], false); err != nil {
+		if err := c.ddp.Sub(name, args[0], false); err != nil {
 			return nil, err
 		}
 	}
 
-	msgChannel := make(chan string, defaultBufferSize)
-	c.client.ddp.CollectionByName("stream-room-messages").AddUpdateListener(genericExtractor{msgChannel, "update"})
+	msgChannel := make(chan string, default_buffer_size)
+	c.ddp.CollectionByName("stream-room-messages").AddUpdateListener(genericExtractor{msgChannel, "update"})
 
 	return msgChannel, nil
 }

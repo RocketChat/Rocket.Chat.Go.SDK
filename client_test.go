@@ -34,10 +34,10 @@ func getAuthenticatedClient(t *testing.T, name, email, password string) *RocketC
 	client := RocketClient{Protocol: Protocol, Host: Host, Port: Port}
 	credentials := &models.UserCredentials{Name: name, Email: email, Password: password}
 
-	rtClient, err := NewLiveClient(&url.URL{Host: Host + ":" + Port}, true)
-	assert.Nil(t, err)
-	_, regErr := rtClient.Live.RegisterUser(credentials)
-	assert.Nil(t, regErr)
+	// rtClient, err := NewLiveClient(&url.URL{Host: Host + ":" + Port}, true)
+	// assert.Nil(t, err)
+	// _, regErr := rea.RegisterUser(credentials)
+	// assert.Nil(t, regErr)
 
 	loginErr := client.Rest.Login(credentials)
 	assert.Nil(t, loginErr)
