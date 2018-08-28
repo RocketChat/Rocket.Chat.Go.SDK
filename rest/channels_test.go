@@ -54,7 +54,7 @@ func TestRestService_ChannelArchivel(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.ChannelArchive(tt.fields.channel)
+			err := rt.ChannelArchive(tt.fields.channel)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 		})
@@ -103,7 +103,7 @@ func TestRestService_ChannelUnarchive(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.ChannelUnarchive(tt.fields.channel)
+			err := rt.ChannelUnarchive(tt.fields.channel)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 		})
