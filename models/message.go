@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// Message ...
 type Message struct {
 	ID       string `json:"_id"`
 	RoomID   string `json:"rid"`

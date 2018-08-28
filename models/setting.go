@@ -1,5 +1,6 @@
 package models
 
+// Setting ...
 type Setting struct {
 	ID           string  `json:"_id"`
 	Blocked      bool    `json:"blocked"`
@@ -16,6 +17,7 @@ type Setting struct {
 	ValueAsset   Asset   `json:"asset"`
 }
 
+// Asset ...
 type Asset struct {
-	DefaultUrl string `json:"defaultUrl"`
+	DefaultURL string `json:"defaultUrl"`
 }

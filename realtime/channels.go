@@ -7,7 +7,8 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
-func (c *Client) GetChannelId(name string) (string, error) {
+// GetChannelID ...
+func (c *Client) GetChannelID(name string) (string, error) {
 	rawResponse, err := c.ddp.Call("getRoomIdByNameOrId", name)
 	if err != nil {
 		return "", err
@@ -99,8 +100,8 @@ func (c *Client) GetChannelSubscriptions() ([]models.ChannelSubscription, error)
 // GetChannelRoles returns room roles
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-room-roles
-func (c *Client) GetChannelRoles(roomId string) error {
-	_, err := c.ddp.Call("getRoomRoles", roomId)
+func (c *Client) GetChannelRoles(roomID string) error {
+	_, err := c.ddp.Call("getRoomRoles", roomID)
 	if err != nil {
 		return err
 	}
@@ -138,8 +139,8 @@ func (c *Client) CreateGroup(name string, users []string) error {
 // Takes roomId
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/joining-channels
-func (c *Client) JoinChannel(roomId string) error {
-	_, err := c.ddp.Call("joinRoom", roomId)
+func (c *Client) JoinChannel(roomID string) error {
+	_, err := c.ddp.Call("joinRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -151,8 +152,8 @@ func (c *Client) JoinChannel(roomId string) error {
 // Takes roomId
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/leaving-rooms
-func (c *Client) LeaveChannel(roomId string) error {
-	_, err := c.ddp.Call("leaveRoom", roomId)
+func (c *Client) LeaveChannel(roomID string) error {
+	_, err := c.ddp.Call("leaveRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -164,8 +165,8 @@ func (c *Client) LeaveChannel(roomId string) error {
 // Takes roomId
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/archive-rooms
-func (c *Client) ArchiveChannel(roomId string) error {
-	_, err := c.ddp.Call("archiveRoom", roomId)
+func (c *Client) ArchiveChannel(roomID string) error {
+	_, err := c.ddp.Call("archiveRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -177,8 +178,8 @@ func (c *Client) ArchiveChannel(roomId string) error {
 // Takes roomId
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/unarchive-rooms
-func (c *Client) UnArchiveChannel(roomId string) error {
-	_, err := c.ddp.Call("unarchiveRoom", roomId)
+func (c *Client) UnArchiveChannel(roomID string) error {
+	_, err := c.ddp.Call("unarchiveRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -190,8 +191,8 @@ func (c *Client) UnArchiveChannel(roomId string) error {
 // Takes roomId
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/delete-rooms
-func (c *Client) DeleteChannel(roomId string) error {
-	_, err := c.ddp.Call("eraseRoom", roomId)
+func (c *Client) DeleteChannel(roomID string) error {
+	_, err := c.ddp.Call("eraseRoom", roomID)
 	if err != nil {
 		return err
 	}
@@ -203,8 +204,8 @@ func (c *Client) DeleteChannel(roomId string) error {
 // takes roomId and topic
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelTopic(roomId string, topic string) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "roomTopic", topic)
+func (c *Client) SetChannelTopic(roomID string, topic string) error {
+	_, err := c.ddp.Call("saveRoomSettings", roomID, "roomTopic", topic)
 	if err != nil {
 		return err
 	}
@@ -216,8 +217,8 @@ func (c *Client) SetChannelTopic(roomId string, topic string) error {
 // takes roomId and roomType
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelType(roomId string, roomType string) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "roomType", roomType)
+func (c *Client) SetChannelType(roomID string, roomType string) error {
+	_, err := c.ddp.Call("saveRoomSettings", roomID, "roomType", roomType)
 	if err != nil {
 		return err
 	}
@@ -226,11 +227,11 @@ func (c *Client) SetChannelType(roomId string, roomType string) error {
 }
 
 // SetChannelJoinCode sets channel join code
-// takes roomId and joinCode
+// takes roomID and joinCode
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelJoinCode(roomId string, joinCode string) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "joinCode", joinCode)
+func (c *Client) SetChannelJoinCode(roomID string, joinCode string) error {
+	_, err := c.ddp.Call("saveRoomSettings", roomID, "joinCode", joinCode)
 	if err != nil {
 		return err
 	}
@@ -242,8 +243,8 @@ func (c *Client) SetChannelJoinCode(roomId string, joinCode string) error {
 // takes roomId and boolean
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelReadOnly(roomId string, readOnly bool) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "readOnly", readOnly)
+func (c *Client) SetChannelReadOnly(roomID string, readOnly bool) error {
+	_, err := c.ddp.Call("saveRoomSettings", roomID, "readOnly", readOnly)
 	if err != nil {
 		return err
 	}
@@ -255,8 +256,8 @@ func (c *Client) SetChannelReadOnly(roomId string, readOnly bool) error {
 // takes roomId and description
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/save-room-settings
-func (c *Client) SetChannelDescription(roomId string, description string) error {
-	_, err := c.ddp.Call("saveRoomSettings", roomId, "roomDescription", description)
+func (c *Client) SetChannelDescription(roomID string, description string) error {
+	_, err := c.ddp.Call("saveRoomSettings", roomID, "roomDescription", description)
 	if err != nil {
 		return err
 	}
