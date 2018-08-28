@@ -353,3 +353,88 @@ func TestRestService_GetChannelInfo(t *testing.T) {
 		})
 	}
 }
+
+func TestRestService_KickChannel(t *testing.T) {
+
+	type fields struct {
+		myDoer  Doer
+		channel *models.Channel
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    models.Channel
+		wantErr error
+	}{
+		{
+			name: "KickChannel OK",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"channel": {
+						  "_id": "ByehQjC44FwMeiLbX",
+						  "name": "invite-me",
+						  "t": "c",
+						  "usernames": [
+							"testing1"
+						  ],
+						  "msgs": 0,
+						  "u": {
+							"_id": "aobEdbYhXfu5hkeqG",
+							"username": "testing1"
+						  },
+						  "ts": "2016-12-09T15:08:58.042Z",
+						  "ro": false,
+						  "sysMes": true,
+						  "_updatedAt": "2016-12-09T15:22:40.656Z"
+						},
+						"success": true
+					  }`,
+				},
+				channel: &models.Channel{
+					ID:   "GENERAL",
+					User: &models.User{ID: "nSYqWzZ4GsKTX4dyK"},
+				},
+			},
+			want: models.Channel{
+				ID:   "ByehQjC44FwMeiLbX",
+				Name: "invite-me",
+				Type: "c",
+			},
+			wantErr: nil,
+		},
+		{
+			name: "KickChannel Err",
+			fields: fields{
+				myDoer: testDoer{
+					responseCode: 200,
+					response: `{
+						"status": "error",
+						"message": "you must be logged in to do this"
+					  }`,
+				},
+				channel: &models.Channel{
+					ID:   "GENERAL",
+					User: &models.User{ID: "nSYqWzZ4GsKTX4dyK"},
+				},
+			},
+			want:    models.Channel{},
+			wantErr: errors.New("status: error, message: you must be logged in to do this"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rt := CreateTestRestClient(tt.fields.myDoer)
+			got, err := rt.Rest.GetChannelInfo(tt.fields.channel)
+
+			assert.Equal(t, err, tt.wantErr, "Unexpected error")
+
+			if err == nil {
+				assert.NotNil(t, got)
+				assert.Equal(t, got.ID, tt.want.ID, "ID did not match")
+				assert.Equal(t, got.Name, tt.want.Name, "Name did not match")
+			}
+		})
+	}
+}

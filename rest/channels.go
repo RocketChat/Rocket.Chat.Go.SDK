@@ -45,6 +45,14 @@ func (c *RestService) GetJoinedChannels(params url.Values) (*ChannelsResponse, e
 	return response, nil
 }
 
+// KickChannel Removes a user from the channel.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/channels/kic
+func (c *RestService) KickChannel(channel *models.Channel) error {
+	var body = fmt.Sprintf(`{ "roomId": "%s", "userId": "%s"}`, channel.ID, channel.User.ID)
+	return c.Post("channels.kick", bytes.NewBufferString(body), new(ChannelResponse))
+}
+
 // LeaveChannel leaves a channel. The id of the channel has to be not nil.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/leave
