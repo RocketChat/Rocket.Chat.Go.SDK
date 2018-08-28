@@ -1,4 +1,4 @@
-package goRocket
+package realtime
 
 import (
 	"log"
@@ -10,8 +10,8 @@ import (
 // GetPublicSettings gets public settings
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-public-settings
-func (c *LiveService) GetPublicSettings() ([]models.Setting, error) {
-	rawResponse, err := c.client.ddp.Call("public-settings/get")
+func (c *Client) GetPublicSettings() ([]models.Setting, error) {
+	rawResponse, err := c.ddp.Call("public-settings/get")
 	if err != nil {
 		return nil, err
 	}

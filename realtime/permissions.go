@@ -1,4 +1,4 @@
-package goRocket
+package realtime
 
 import (
 	"log"
@@ -10,8 +10,8 @@ import (
 // GetPermissions gets permissions
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-permissions
-func (c *LiveService) GetPermissions() ([]models.Permission, error) {
-	rawResponse, err := c.client.ddp.Call("permissions/get")
+func (c *Client) GetPermissions() ([]models.Permission, error) {
+	rawResponse, err := c.ddp.Call("permissions/get")
 	if err != nil {
 		return nil, err
 	}
@@ -40,21 +40,15 @@ func (c *LiveService) GetPermissions() ([]models.Permission, error) {
 // GetUserRoles gets current users roles
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/get-user-roles
-func (c *LiveService) GetUserRoles() error {
-	rawResponse, err := c.client.ddp.Call("getUserRoles")
+func (c *Client) GetUserRoles() error {
+	rawResponse, err := c.ddp.Call("getUserRoles")
 	if err != nil {
 		return err
 	}
 
-	document, err := gabs.Consume(rawResponse)
-	if err != nil {
-		log.Println(err)
-	}
-	roles, err := document.Children()
-	if err != nil {
-		log.Println(err)
-	}
+	document, _ := gabs.Consume(rawResponse)
 
+	roles, err := document.Children()
 	// TODO: Figure out if this function is even useful if so return it
 	log.Println(roles)
 
