@@ -41,7 +41,7 @@ func (c *Client) GetPublicSettings() ([]models.Setting, error) {
 			setting.ValueInt = rawSetting.Path("value").Data().(float64)
 		case "asset":
 			setting.ValueAsset = models.Asset{
-				DefaultUrl: stringOrZero(rawSetting.Path("value").Data().(map[string]interface{})["defaultUrl"]),
+				DefaultURL: stringOrZero(rawSetting.Path("value").Data().(map[string]interface{})["defaultUrl"]),
 			}
 
 		default:

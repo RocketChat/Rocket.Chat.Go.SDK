@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// Channel ...
 type Channel struct {
 	ID    string `json:"_id"`
 	Name  string `json:"name"`
@@ -25,13 +26,14 @@ type Channel struct {
 	// } `json:"customFields,omitempty"`
 }
 
+// ChannelSubscription ...
 type ChannelSubscription struct {
 	ID          string   `json:"_id"`
 	Alert       bool     `json:"alert"`
 	Name        string   `json:"name"`
 	DisplayName string   `json:"fname"`
 	Open        bool     `json:"open"`
-	RoomId      string   `json:"rid"`
+	RoomID      string   `json:"rid"`
 	Type        string   `json:"c"`
 	User        User     `json:"u"`
 	Roles       []string `json:"roles"`
