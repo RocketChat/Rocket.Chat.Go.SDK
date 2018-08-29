@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// Channel ...
 type Channel struct {
 	ID    string `json:"_id"`
 	Name  string `json:"name"`
@@ -25,15 +26,33 @@ type Channel struct {
 	// } `json:"customFields,omitempty"`
 }
 
+// ChannelSubscription ...
 type ChannelSubscription struct {
 	ID          string   `json:"_id"`
 	Alert       bool     `json:"alert"`
 	Name        string   `json:"name"`
 	DisplayName string   `json:"fname"`
 	Open        bool     `json:"open"`
-	RoomId      string   `json:"rid"`
+	RoomID      string   `json:"rid"`
 	Type        string   `json:"c"`
 	User        User     `json:"u"`
 	Roles       []string `json:"roles"`
 	Unread      float64  `json:"unread"`
+}
+
+//MembersList members in a channel
+type MembersList struct {
+	Members []Member `json:"members"`
+	Count   int      `json:"count"`
+	Offset  int      `json:"offset"`
+	Total   int      `json:"total"`
+	Success bool     `json:"success"`
+}
+
+// Member ...
+type Member struct {
+	ID       string `json:"_id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	Status   string `json:"status"`
 }
