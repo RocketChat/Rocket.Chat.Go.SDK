@@ -18,8 +18,6 @@ func main() {
 	userPtr := flag.String("user", "", "Rocket.chat user")
 	passPtr := flag.String("pass", "", "Rocket.chat password")
 
-	flag.Parse()
-
 	required := []string{"host", "user", "pass"}
 	flag.Parse()
 
@@ -55,6 +53,9 @@ func main() {
 	}
 
 	general := &models.Channel{ID: "GENERAL", Name: "general"}
+
+	members, _ := rc.Rest.GetMembersList("GENERAL")
+	fmt.Println(members)
 
 	messages, err := rc.Rest.GetMessages(general, &models.Pagination{Count: 5})
 	if err != nil {
@@ -94,3 +95,4 @@ func main() {
 		log.Println(err)
 	}
 }
+
