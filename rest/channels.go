@@ -39,7 +39,7 @@ func (c *Client) ChannelArchive(channel *models.Channel) error {
 // ChannelUnarchive Unarchives a channel.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/unarchive
-func (c *RestService) ChannelUnarchive(channel *models.Channel) error {
+func (c *Client) ChannelUnarchive(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
 	return c.Post("channels.unarchive", bytes.NewBufferString(body), new(ChannelResponse))
 }
