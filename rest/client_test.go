@@ -1,4 +1,4 @@
-package goRocket
+package rest
 
 import (
 	"errors"
@@ -6,47 +6,50 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/common_testing"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/realtime"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	testUserName  string        // nolint
-	testUserEmail string        // nolint
-	testPassword  = "test"      // nolint
-	rocketClient  *RocketClient // nolint
+	testUserName  string   // nolint
+	testUserEmail string   // nolint
+	testPassword  = "test" // nolint
+	testClient    *Client  // nolint
 )
 
 // nolint - deadcode !
-func getDefaultClient(t *testing.T) *RocketClient {
+func getDefaultClient(t *testing.T) (c *Client) {
 
-	if rocketClient == nil {
-		testUserEmail = GetRandomEmail()
-		testUserName = GetRandomString()
-		rocketClient = getAuthenticatedClient(t, testUserName, testUserEmail, testPassword)
+	if testClient == nil {
+		testUserEmail = common_testing.GetRandomEmail()
+		testUserName = common_testing.GetRandomString()
+		c = getAuthenticatedClient(t, testUserName, testUserEmail, testPassword)
 	}
 
-	return rocketClient
+	return c
 }
 
 // nolint is unused
-func getAuthenticatedClient(t *testing.T, name, email, password string) *RocketClient {
-	client := RocketClient{Protocol: Protocol, Host: Host, Port: Port}
-	credentials := &UserCredentials{Name: name, Email: email, Password: password}
+func getAuthenticatedClient(t *testing.T, name, email, password string) *Client {
+	client := Client{Protocol: common_testing.Protocol, Host: common_testing.Host, Port: common_testing.Port}
+	credentials := &models.UserCredentials{Name: name, Email: email, Password: password}
 
-	rtClient, err := NewLiveClient(&url.URL{Host: Host + ":" + Port}, true)
+	rtClient, err := realtime.NewClient(&url.URL{Host: common_testing.Host + ":" + common_testing.Port}, true)
 	assert.Nil(t, err)
-	_, regErr := rtClient.Live.RegisterUser(credentials)
+	_, regErr := rtClient.RegisterUser(credentials)
 	assert.Nil(t, regErr)
 
-	loginErr := client.Rest.Login(credentials)
+	loginErr := client.Login(credentials)
 	assert.Nil(t, loginErr)
 
 	return &client
 }
 
 // nolint - deadcode !
-func findMessage(messages []Message, user string, msg string) *Message {
-	var m *Message
+func findMessage(messages []models.Message, user string, msg string) *models.Message {
+	var m *models.Message
 	for i := range messages {
 		m = &messages[i]
 		if m.User.UserName == user && m.Msg == msg {
@@ -58,7 +61,7 @@ func findMessage(messages []Message, user string, msg string) *Message {
 }
 
 // nolint - deadcode !
-func getChannel(channels []Channel, name string) *Channel {
+func getChannel(channels []models.Channel, name string) *models.Channel {
 	for _, r := range channels {
 		if r.Name == name {
 			return &r
@@ -132,7 +135,7 @@ func TestRestService_getURL(t *testing.T) {
 			rt.Protocol = tt.fields.protocol
 			rt.Port = tt.fields.port
 			rt.Version = tt.fields.version
-			got := rt.Rest.getURL()
+			got := rt.getURL()
 
 			assert.Equal(t, got, tt.want, "Unexpected error")
 		})
@@ -204,7 +207,7 @@ func TestRestService_Get(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.Get(tt.args.api, tt.args.params, tt.args.response)
+			err := rt.Get(tt.args.api, tt.args.params, tt.args.response)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 		})
@@ -261,7 +264,7 @@ func TestRestService_Post(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.Post(tt.args.api, tt.args.body, tt.args.response)
+			err := rt.Post(tt.args.api, tt.args.body, tt.args.response)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 		})
@@ -318,7 +321,7 @@ func TestRestService_PostForm(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.PostForm(tt.args.api, tt.args.params, tt.args.response)
+			err := rt.PostForm(tt.args.api, tt.args.params, tt.args.response)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 		})
@@ -381,7 +384,7 @@ func TestRestService_doRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.doRequest(tt.args.method, tt.args.api, tt.args.params, tt.args.body, tt.args.response)
+			err := rt.doRequest(tt.args.method, tt.args.api, tt.args.params, tt.args.body, tt.args.response)
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 		})
 	}

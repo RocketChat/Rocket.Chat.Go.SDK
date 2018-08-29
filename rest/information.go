@@ -1,20 +1,22 @@
-package goRocket
+package rest
 
 import (
 	"net/url"
+
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 // InfoResponse retired by GetServerInfo
 type InfoResponse struct {
 	Status
-	Info Info `json:"info"`
+	Info models.Info `json:"info"`
 }
 
 // GetServerInfo a simple method, requires no authentication,
 // that returns information about the server including version information.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/info
-func (c *RestService) GetServerInfo() (*Info, error) {
+func (c *Client) GetServerInfo() (*models.Info, error) {
 	response := new(InfoResponse)
 	if err := c.Get("info", nil, response); err != nil {
 		return nil, err
@@ -26,14 +28,14 @@ func (c *RestService) GetServerInfo() (*Info, error) {
 // DirectoryResponse for GetDirectory
 type DirectoryResponse struct {
 	Status
-	Directory
+	models.Directory
 }
 
 // GetDirectory a method, that searches by users or channels on all users and channels available on server.
 // It supports the Offset, Count, and Sort Query Parameters along with Query and Fields Query Parameters.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/directory
-func (c *RestService) GetDirectory(params url.Values) (*Directory, error) {
+func (c *Client) GetDirectory(params url.Values) (*models.Directory, error) {
 	response := new(DirectoryResponse)
 	if err := c.Get("directory", params, response); err != nil {
 		return nil, err
@@ -45,14 +47,14 @@ func (c *RestService) GetDirectory(params url.Values) (*Directory, error) {
 // SpotlightResponse for GetSpotlight
 type SpotlightResponse struct {
 	Status
-	Spotlight
+	models.Spotlight
 }
 
 // GetSpotlight searches for users or rooms that are visible to the user.
 // WARNING: It will only return rooms that user didn’t join yet.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/spotlight
-func (c *RestService) GetSpotlight(params url.Values) (*Spotlight, error) {
+func (c *Client) GetSpotlight(params url.Values) (*models.Spotlight, error) {
 	response := new(SpotlightResponse)
 	if err := c.Get("spotlight", params, response); err != nil {
 		return nil, err
@@ -64,13 +66,13 @@ func (c *RestService) GetSpotlight(params url.Values) (*Spotlight, error) {
 // StatisticsResponse used with GetStatistics
 type StatisticsResponse struct {
 	Status
-	StatisticsInfo
+	models.StatisticsInfo
 }
 
 // GetStatistics statistics about the Rocket.Chat server.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/statistics
-func (c *RestService) GetStatistics() (*StatisticsInfo, error) {
+func (c *Client) GetStatistics() (*models.StatisticsInfo, error) {
 	response := new(StatisticsResponse)
 
 	if err := c.Get("statistics", nil, response); err != nil {
@@ -83,14 +85,14 @@ func (c *RestService) GetStatistics() (*StatisticsInfo, error) {
 // StatisticsListResponse statistics about the Rocket.Chat server.
 type StatisticsListResponse struct {
 	Status
-	StatisticsList
+	models.StatisticsList
 }
 
 // GetStatisticsList selectable statistics about the Rocket.Chat server.
 // It supports the Offset, Count and Sort Query Parameters along with just the Fields and Query Parameters.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/statistics-list
-func (c *RestService) GetStatisticsList(params url.Values) (*StatisticsList, error) {
+func (c *Client) GetStatisticsList(params url.Values) (*models.StatisticsList, error) {
 	response := new(StatisticsListResponse)
 	if err := c.Get("statistics.list", params, response); err != nil {
 		return nil, err

@@ -1,9 +1,10 @@
-package goRocket
+package rest
 
 import (
 	"errors"
 	"testing"
 
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,7 +13,7 @@ func TestRestService_Login(t *testing.T) {
 		myDoer Doer
 	}
 	type args struct {
-		credentials *UserCredentials
+		credentials *models.UserCredentials
 	}
 	tests := []struct {
 		name    string
@@ -56,7 +57,7 @@ func TestRestService_Login(t *testing.T) {
 				},
 			},
 			args: args{
-				credentials: &UserCredentials{Email: "fred", Password: "smith"},
+				credentials: &models.UserCredentials{Email: "fred", Password: "smith"},
 			},
 			wantErr: nil,
 		},
@@ -96,7 +97,7 @@ func TestRestService_Login(t *testing.T) {
 				},
 			},
 			args: args{
-				credentials: &UserCredentials{ID: "aobEdbYhXfu5hkeqG", Token: "9HqLlyZOugoStsXCUfD_0YdwnNnunAJF8V47U3QHXSq"},
+				credentials: &models.UserCredentials{ID: "aobEdbYhXfu5hkeqG", Token: "9HqLlyZOugoStsXCUfD_0YdwnNnunAJF8V47U3QHXSq"},
 			},
 			wantErr: nil,
 		},
@@ -111,7 +112,7 @@ func TestRestService_Login(t *testing.T) {
 				},
 			},
 			args: args{
-				credentials: &UserCredentials{Email: "", Password: ""},
+				credentials: &models.UserCredentials{Email: "", Password: ""},
 			},
 			wantErr: errors.New("got false response"),
 		},
@@ -119,7 +120,7 @@ func TestRestService_Login(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.Login(tt.args.credentials)
+			err := rt.Login(tt.args.credentials)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 
@@ -174,7 +175,7 @@ func TestRestService_Logout(t *testing.T) {
 			if tt.authed {
 				rt.auth = &authInfo{id: "HAS A TOKEN"}
 			}
-			got, err := rt.Rest.Logout()
+			got, err := rt.Logout()
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 
