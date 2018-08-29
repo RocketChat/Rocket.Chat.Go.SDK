@@ -578,7 +578,7 @@ func TestRestService_ChannelsCreate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.ChannelsCreate(tt.fields.channel)
+			err := rt.ChannelsCreate(tt.fields.channel)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 
@@ -628,7 +628,7 @@ func TestRestService_ChannelClose(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rt := CreateTestRestClient(tt.fields.myDoer)
-			err := rt.Rest.ChannelClose(tt.fields.channel)
+			err := rt.ChannelClose(tt.fields.channel)
 
 			assert.Equal(t, err, tt.wantErr, "Unexpected error")
 

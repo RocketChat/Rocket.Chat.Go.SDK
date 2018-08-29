@@ -44,7 +44,7 @@ func (c *Client) GetPublicChannels() (*ChannelsResponse, error) {
 // optionally including specified users. The channel creator is always included.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/create
-func (c *RestService) ChannelsCreate(channel *models.Channel) error {
+func (c *Client) ChannelsCreate(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "name": "%s"}`, channel.Name)
 	return c.Post("channels.create", bytes.NewBufferString(body), new(ChannelResponse))
 }
@@ -52,7 +52,7 @@ func (c *RestService) ChannelsCreate(channel *models.Channel) error {
 // ChannelClose Removes the channel from the user’s list of channels.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/create
-func (c *RestService) ChannelClose(channel *models.Channel) error {
+func (c *Client) ChannelClose(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
 	return c.Post("channels.close", bytes.NewBufferString(body), new(ChannelResponse))
 }
