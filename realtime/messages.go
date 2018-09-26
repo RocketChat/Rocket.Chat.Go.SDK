@@ -179,13 +179,8 @@ func getMessagesFromUpdateEvent(update ddp.Update) []models.Message {
 		return make([]models.Message, 0)
 	}
 
-	messages := make([]models.Message, len(args))
-
-	for i, arg := range args {
-		messages[i] = *getMessageFromDocument(arg)
-	}
-
-	return messages
+	message := getMessageFromDocument(args[0])
+	return []models.Message{*message}
 }
 
 func getMessageFromData(data interface{}) *models.Message {
