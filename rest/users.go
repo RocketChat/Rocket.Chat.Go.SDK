@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"bytes"
 	"net/url"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
@@ -37,7 +36,7 @@ func (c *Client) Login(credentials *models.UserCredentials) error {
 
 	response := new(logonResponse)
 	data := url.Values{"user": {credentials.Email}, "password": {credentials.Password}}
-	if err := c.Post("login", bytes.NewBufferString(data.Encode()), response); err != nil {
+	if err := c.PostForm("login", data, response); err != nil {
 		return err
 	}
 
