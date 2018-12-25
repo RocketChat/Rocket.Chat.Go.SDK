@@ -27,10 +27,24 @@ type Client struct {
 	Port     string
 	Version  string
 
+	// http interface can be used when testing
+	myDoer Doer
+
+	service
+
 	// Use this switch to see all network communication.
 	Debug bool
 
 	auth *authInfo
+}
+
+// Doer to make testing easer !
+type Doer interface {
+	Do(*http.Request) (*http.Response, error)
+}
+
+type service struct {
+	client *Client
 }
 
 type Status struct {
@@ -71,7 +85,7 @@ type StatusResponse struct {
 	Channel string `json:"channel"`
 }
 
-func NewClient(serverUrl *url.URL, debug bool) *Client {
+func NewClient(serverUrl *url.URL, debug bool) (c *Client) {
 	protocol := "http"
 	port := "80"
 
@@ -84,7 +98,16 @@ func NewClient(serverUrl *url.URL, debug bool) *Client {
 		port = serverUrl.Port()
 	}
 
-	return &Client{Host: serverUrl.Hostname(), Port: port, Protocol: protocol, Version: "v1", Debug: debug}
+	c.Host = serverUrl.Hostname()
+	c.Port = port
+	c.Protocol = protocol
+	c.Version = "v1"
+	c.Debug = debug
+
+	// set default http interface to use
+	c.myDoer = http.DefaultClient
+
+	return
 }
 
 func (c *Client) getUrl() string {
@@ -141,7 +164,7 @@ func (c *Client) doRequest(method, api string, params url.Values, body io.Reader
 		log.Println(request)
 	}
 
-	resp, err := http.DefaultClient.Do(request)
+	resp, err := c.myDoer.Do(request)
 
 	if err != nil {
 		return err
