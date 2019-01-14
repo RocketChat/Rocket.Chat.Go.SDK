@@ -93,13 +93,27 @@ func (c *Client) Logout() (string, error) {
 // CreateUser being logged in with a user that has permission to do so.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/create
-func (c *Client) CreateUser(msg *models.CreateUserRequest) (*CreateUserResponse, error) {
-	body, err := json.Marshal(msg)
+func (c *Client) CreateUser(req *models.CreateUserRequest) (*CreateUserResponse, error) {
+	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
 	response := new(CreateUserResponse)
 	err = c.Post("users.create", bytes.NewBuffer(body), response)
+	return response, err
+}
+
+// UpdateUser updates a user's data being logged in with a user that has permission to do so.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/users/update/
+func (c *Client) UpdateUser(req *models.UpdateUserRequest) (*CreateUserResponse, error) {
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(CreateUserResponse)
+	err = c.Post("users.update", bytes.NewBuffer(body), response)
 	return response, err
 }
