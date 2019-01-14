@@ -77,9 +77,9 @@ func (c *Client) Login(credentials *models.UserCredentials) error {
 // CreateToken creates an access token for a user
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/createtoken/
-func (c *Client) CreateToken(userID string) (*models.UserCredentials, error) {
+func (c *Client) CreateToken(userID, username string) (*models.UserCredentials, error) {
 	response := new(logonResponse)
-	data := url.Values{"userId": {userID}}
+	data := url.Values{"userId": {userID}, "username": {username}}
 	if err := c.PostForm("users.createToken", data, response); err != nil {
 		return nil, err
 	}
