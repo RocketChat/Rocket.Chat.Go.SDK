@@ -3,6 +3,7 @@ package rest
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -115,5 +116,16 @@ func (c *Client) UpdateUser(req *models.UpdateUserRequest) (*CreateUserResponse,
 
 	response := new(CreateUserResponse)
 	err = c.Post("users.update", bytes.NewBuffer(body), response)
+	return response, err
+}
+
+// SetUserAvatar updates a user's avatar being logged in with a user that has permission to do so.
+// Currently only passing an URL is possible.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/users/setavatar/
+func (c *Client) SetUserAvatar(userID, username, avatarURL string) (*Status, error) {
+	body := fmt.Sprintf(`{ "userId": "%s","username": "%s","avatarUrl":"%s"}`, userID, username, avatarURL)
+	response := new(Status)
+	err := c.Post("users.setAvatar", bytes.NewBufferString(body), response)
 	return response, err
 }
