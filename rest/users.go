@@ -74,16 +74,16 @@ func (c *Client) Login(credentials *models.UserCredentials) error {
 	return nil
 }
 
-// LoginOtherUser The Email and the Password are mandatory. The auth token of the user are NOT stored in the Client instance.
-// The credentials are returned for external use.
+// CreateToken creates an access token for a user
 //
-// https://rocket.chat/docs/developer-guides/rest-api/authentication/login
-func (c *Client) LoginOtherUser(credentials *models.UserCredentials) (*models.UserCredentials, error) {
+// https://rocket.chat/docs/developer-guides/rest-api/users/createtoken/
+func (c *Client) CreateToken(userID string) (*models.UserCredentials, error) {
 	response := new(logonResponse)
-	data := url.Values{"user": {credentials.Email}, "password": {credentials.Password}}
-	if err := c.PostForm("login", data, response); err != nil {
+	data := url.Values{"userId": {userID}}
+	if err := c.PostForm("users.createToken", data, response); err != nil {
 		return nil, err
 	}
+	credentials := &models.UserCredentials{}
 	credentials.ID, credentials.Token = response.Data.UserID, response.Data.Token
 	return credentials, nil
 }
