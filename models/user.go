@@ -8,3 +8,11 @@ type User struct {
 	Token        string `json:"token"`
 	TokenExpires int64  `json:"tokenExpires"`
 }
+
+type CreateUserRequest struct {
+	Name         string            `json:"name"`
+	Email        string            `json:"email"`
+	Password     string            `json:"password"`
+	Username     string            `json:"username"`
+	CustomFields map[string]string `json:"customFields,omitempty"`
+}
