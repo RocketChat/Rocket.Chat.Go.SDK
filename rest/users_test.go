@@ -3,7 +3,7 @@ package rest
 import (
 	"testing"
 
-	"github.com/facundomedica/Rocket.Chat.Go.SDK/common_testing"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/common_testing"
 	"github.com/stretchr/testify/assert"
 )
 

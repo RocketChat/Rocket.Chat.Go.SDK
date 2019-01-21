@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Jeffail/gabs"
-	"github.com/facundomedica/Rocket.Chat.Go.SDK/models"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
 type ddpLoginRequest struct {
