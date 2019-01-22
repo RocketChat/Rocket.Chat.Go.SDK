@@ -24,6 +24,7 @@ type Response interface {
 type Client struct {
 	Protocol string
 	Host     string
+	Path     string
 	Port     string
 	Version  string
 
@@ -84,14 +85,14 @@ func NewClient(serverUrl *url.URL, debug bool) *Client {
 		port = serverUrl.Port()
 	}
 
-	return &Client{Host: serverUrl.Hostname(), Port: port, Protocol: protocol, Version: "v1", Debug: debug}
+	return &Client{Host: serverUrl.Hostname(), Path: serverUrl.Path, Port: port, Protocol: protocol, Version: "v1", Debug: debug}
 }
 
 func (c *Client) getUrl() string {
 	if len(c.Version) == 0 {
 		c.Version = "v1"
 	}
-	return fmt.Sprintf("%v://%v:%v/api/%s", c.Protocol, c.Host, c.Port, c.Version)
+	return fmt.Sprintf("%v://%v:%v%s/api/%s", c.Protocol, c.Host, c.Port, c.Path, c.Version)
 }
 
 // Get call Get

@@ -17,27 +17,27 @@ type Client struct {
 }
 
 // Creates a new instance and connects to the websocket.
-func NewClient(serverUrl *url.URL, debug bool) (*Client, error) {
+func NewClient(serverURL *url.URL, debug bool) (*Client, error) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	wsUrl := "ws"
+	wsURL := "ws"
 	port := 80
 
-	if serverUrl.Scheme == "https" {
-		wsUrl = "wss"
+	if serverURL.Scheme == "https" {
+		wsURL = "wss"
 		port = 443
 	}
 
-	if len(serverUrl.Port()) > 0 {
-		port, _ = strconv.Atoi(serverUrl.Port())
+	if len(serverURL.Port()) > 0 {
+		port, _ = strconv.Atoi(serverURL.Port())
 	}
 
-	wsUrl = fmt.Sprintf("%s://%v:%v/websocket", wsUrl, serverUrl.Hostname(), port)
+	wsURL = fmt.Sprintf("%s://%v:%v%s/websocket", wsURL, serverURL.Hostname(), port, serverURL.Path)
 
-	log.Println("About to connect to:", wsUrl, port, serverUrl.Scheme)
+	log.Println("About to connect to:", wsURL, port, serverURL.Scheme)
 
 	c := new(Client)
-	c.ddp = ddp.NewClient(wsUrl, serverUrl.String())
+	c.ddp = ddp.NewClient(wsURL, serverURL.String())
 
 	if debug {
 		c.ddp.SetSocketLogActive(true)
