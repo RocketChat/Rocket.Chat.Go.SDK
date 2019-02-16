@@ -58,13 +58,10 @@ func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error
 	response := new(ChannelResponse)
 	switch {
 	case channel.Name != "":
-		fmt.Printf("the channel name is %v", channel.Name)
 		if err := c.Get("channels.info", url.Values{"roomName": []string{channel.Name}}, response); err != nil {
 			return nil, err
 		}
 	default:
-
-		fmt.Printf("the channel id is %v \n the name is %v \n", channel.ID, channel.Name)
 		if err := c.Get("channels.info", url.Values{"roomId": []string{channel.ID}}, response); err != nil {
 			return nil, err
 		}
