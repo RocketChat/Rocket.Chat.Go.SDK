@@ -69,6 +69,7 @@ func (c *Client) GetChannelSubscriptions() ([]models.ChannelSubscription, error)
 	for _, sub := range channelSubs {
 		channelSubscription := models.ChannelSubscription{
 			ID:          stringOrZero(sub.Path("_id").Data()),
+			RoomId:      stringOrZero(sub.Path("rid").Data()),
 			Alert:       sub.Path("alert").Data().(bool),
 			Name:        stringOrZero(sub.Path("name").Data()),
 			DisplayName: stringOrZero(sub.Path("fname").Data()),
