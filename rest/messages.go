@@ -65,3 +65,23 @@ func (c *Client) GetMessages(channel *models.Channel, page *models.Pagination) (
 
 	return response.Messages, nil
 }
+
+// SetReaction Toggles the authenticated user’s reaction to the provided message.
+//
+// https://rocket.chat/docs/developer-guides/rest-api/chat/react/
+func (c *Client) SetReaction(messageID, emoji string, shouldReact bool) error {
+
+	payload := map[string]interface{}{}
+	payload["messageId"] = messageID
+	payload["emoji"] = emoji
+	payload["shouldReact"] = shouldReact
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	response := new(Status)
+	err = c.Post("chat.react", bytes.NewBuffer(body), response)
+	return err
+}
