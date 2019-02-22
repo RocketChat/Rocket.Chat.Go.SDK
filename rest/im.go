@@ -14,7 +14,6 @@ type CreateDirectMessageRequest struct {
 type CreateDirectMessageResponse struct {
 	Status
 	Room    models.Room `json:"room"`
-	Success bool        `json:"success"`
 }
 
 // CreateDirectMessage (IM Create) Create a direct message session with another user.
