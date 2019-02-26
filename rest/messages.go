@@ -85,3 +85,37 @@ func (c *Client) SetReaction(messageID, emoji string, shouldReact bool) error {
 	err = c.Post("chat.react", bytes.NewBuffer(body), response)
 	return err
 }
+
+// UpdateMessage updates the text of a message
+//
+// https://rocket.chat/docs/developer-guides/rest-api/chat/update/
+func (c *Client) UpdateMessage(messageID, roomID string, newText string) (*MessageResponse, error) {
+
+	payload := map[string]interface{}{}
+	payload["messageId"] = messageID
+	payload["roomId"] = roomID
+	payload["text"] = newText
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(MessageResponse)
+	err = c.Post("chat.update", bytes.NewBuffer(body), response)
+	return response, err
+}
+
+// GetMessage gets a single message by its ID
+//
+// https://rocket.chat/docs/developer-guides/rest-api/chat/getmessage/
+func (c *Client) GetMessage(messageID string) (*MessageResponse, error) {
+
+	params := url.Values{
+		"messageId": []string{messageID},
+	}
+
+	response := new(MessageResponse)
+	err := c.Get("chat.getMessage", params, response)
+	return response, err
+}
