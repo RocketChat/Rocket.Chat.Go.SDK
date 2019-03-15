@@ -77,9 +77,15 @@ type AttachmentField struct {
 	Value string `json:"value"`
 }
 
+type AttachmentActionType string
+
+const {
+	AttachmentActionTypeButton AttachmentActionType = "button"
+}
+
 // AttachmentAction are action buttons on message attachments
 type AttachmentAction struct {
-	Type
+	Type AttachmentActionType `json:"type"`
 	Text string `json:"text"`
 	Url string `json:"url"`
 	ImageURL string `json:"image_url"`
