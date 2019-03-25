@@ -12,9 +12,8 @@ func TestClient_SubscribeToMessageStream(t *testing.T) {
 
 	general := models.Channel{ID: "GENERAL"}
 	textToSend := "RealtimeTest"
-	messageChannel := make(chan models.Message, 1)
 
-	err := c.SubscribeToMessageStream(&general, messageChannel)
+	messageChannel, err := c.SubscribeToMessageStream(&general)
 
 	assert.Nil(t, err, "Function returned error")
 	assert.NotNil(t, messageChannel, "Function didn't returned general")
@@ -52,9 +51,8 @@ func TestClient_SubscribeToMessageStream_UnknownChannel(t *testing.T) {
 
 	c := getLoggedInClient(t)
 	channel := models.Channel{ID: "unknown"}
-	messageChannel := make(chan models.Message, 1)
 
-	err := c.SubscribeToMessageStream(&channel, messageChannel)
+	_, err := c.SubscribeToMessageStream(&channel)
 
 	assert.NotNil(t, err, "Function didn't return error")
 }

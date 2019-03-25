@@ -158,16 +158,16 @@ func (c *Client) UnPinMessage(message *models.Message) error {
 // Returns a buffered channel
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/subscriptions/stream-room-messages/
-func (c *Client) SubscribeToMessageStream(channel *models.Channel, msgChannel chan models.Message) error {
+func (c *Client) SubscribeToMessageStream(channel *models.Channel) (chan models.Message, error) {
 
 	if err := c.ddp.Sub("stream-room-messages", channel.ID, send_added_event); err != nil {
-		return err
+		return nil, err
 	}
 
-	//msgChannel := make(chan models.Message, default_buffer_size)
-	c.ddp.CollectionByName("stream-room-messages").AddUpdateListener(messageExtractor{msgChannel, "update"})
+	msgChannel := make(chan models.Message, default_buffer_size)
+	c.ddp.CollectionByName("stream-room-messages").AddUpdateListener(messageExtractor{msgChannel, channel.ID})
 
-	return nil
+	return msgChannel, nil
 }
 
 func getMessagesFromUpdateEvent(update ddp.Update) []models.Message {
@@ -232,11 +232,11 @@ func stringOrZero(i interface{}) string {
 
 type messageExtractor struct {
 	messageChannel chan models.Message
-	operation      string
+	channelId      string
 }
 
 func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc ddp.Update) {
-	if operation == u.operation {
+	if operation == "update" && doc["eventName"] == u.channelId {
 		msgs := getMessagesFromUpdateEvent(doc)
 		for _, m := range msgs {
 			u.messageChannel <- m
