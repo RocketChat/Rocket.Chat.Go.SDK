@@ -57,7 +57,7 @@ func (c *Client) LeaveChannel(channel *models.Channel) error {
 func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error) {
 	response := new(ChannelResponse)
 	switch {
-	case channel.Name != "":
+	case channel.Name != "" && channel.ID == "":
 		if err := c.Get("channels.info", url.Values{"roomName": []string{channel.Name}}, response); err != nil {
 			return nil, err
 		}
