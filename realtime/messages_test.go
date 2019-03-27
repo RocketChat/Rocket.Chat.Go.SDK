@@ -12,11 +12,12 @@ func TestClient_SubscribeToMessageStream(t *testing.T) {
 
 	general := models.Channel{ID: "GENERAL"}
 	textToSend := "RealtimeTest"
-	message := &models.Message{
-		ID:     c.newRandomId(),
-		RoomID: general.ID,
-		Msg:    textToSend,
-	}
+
+	message := c.NewMessage(&general)
+	assert.NotNil(t, message, "NewMessage did not return nil.")
+	assert.Equal(t, message.RoomID, general.ID)
+	message.Msg = textToSend
+
 	messageChannel := make(chan models.Message, 1)
 
 	err := c.SubscribeToMessageStream(&general, messageChannel)

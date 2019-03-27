@@ -17,6 +17,15 @@ const (
 	default_buffer_size = 100
 )
 
+// NewMessage creates basic message with a random ID and a room ID
+// Takes channel
+func (c *Client) NewMessage(channel *models.Channel) *models.Message {
+	return &models.Message{
+		ID:     c.newRandomId(),
+		RoomID: channel.ID,
+	}
+}
+
 // LoadHistory loads history
 // Takes roomID
 //
