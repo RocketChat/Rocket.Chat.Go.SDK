@@ -17,12 +17,13 @@ const (
 	default_buffer_size = 100
 )
 
-// NewMessage creates basic message with a random ID and a room ID
-// Takes channel
-func (c *Client) NewMessage(channel *models.Channel) *models.Message {
+// NewMessage creates basic message with an ID, a RoomID, and a Msg
+// Takes channel and text
+func (c *Client) NewMessage(channel *models.Channel, text string) *models.Message {
 	return &models.Message{
 		ID:     c.newRandomId(),
 		RoomID: channel.ID,
+		Msg:    text,
 	}
 }
 
