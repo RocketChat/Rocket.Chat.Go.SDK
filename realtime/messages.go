@@ -17,12 +17,22 @@ const (
 	default_buffer_size = 100
 )
 
+// NewMessage creates basic message with an ID, a RoomID, and a Msg
+// Takes channel and text
+func (c *Client) NewMessage(channel *models.Channel, text string) *models.Message {
+	return &models.Message{
+		ID:     c.newRandomId(),
+		RoomID: channel.ID,
+		Msg:    text,
+	}
+}
+
 // LoadHistory loads history
-// Takes roomId
+// Takes roomID
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/load-history
-func (c *Client) LoadHistory(roomId string) error {
-	_, err := c.ddp.Call("loadHistory", roomId)
+func (c *Client) LoadHistory(roomID string) error {
+	_, err := c.ddp.Call("loadHistory", roomID)
 	if err != nil {
 		return err
 	}
@@ -31,17 +41,12 @@ func (c *Client) LoadHistory(roomId string) error {
 }
 
 // SendMessage sends message to channel
-// takes channel and message
+// takes message
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/send-message
-func (c *Client) SendMessage(channel *models.Channel, text string) (*models.Message, error) {
-	m := models.Message{
-		ID:     c.newRandomId(),
-		RoomID: channel.ID,
-		Msg:    text,
-	}
+func (c *Client) SendMessage(message *models.Message) (*models.Message, error) {
 
-	rawResponse, err := c.ddp.Call("sendMessage", m)
+	rawResponse, err := c.ddp.Call("sendMessage", message)
 	if err != nil {
 		return nil, err
 	}
