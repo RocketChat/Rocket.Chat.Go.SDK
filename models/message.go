@@ -63,7 +63,7 @@ type Attachment struct {
 	VideoURL string `json:"video_url,omitempty"`
 
 	Actions                []AttachmentAction               `json:"actions,omitempty"`
-	ActionButtonsAlignment AttachmentActionButtonsAlignment `json:"actionButtonsAlignment,omitempty"`
+	ActionButtonsAlignment AttachmentActionButtonsAlignment `json:"button_alignment,omitempty"`
 
 	Fields []AttachmentField `json:"fields,omitempty"`
 }
