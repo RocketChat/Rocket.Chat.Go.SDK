@@ -3,7 +3,7 @@ package realtime
 import (
 	"testing"
 
-	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
+	"github.com/facundomedica/Rocket.Chat.Go.SDK/models"
 	"github.com/stretchr/testify/assert"
 )
 
