@@ -12,6 +12,13 @@ func TestClient_SubscribeToMessageStream(t *testing.T) {
 
 	general := models.Channel{ID: "GENERAL"}
 	textToSend := "RealtimeTest"
+
+	message := c.NewMessage(&general, textToSend)
+	assert.NotNil(t, message, "NewMessage did not return nil.")
+	assert.Equal(t, message.RoomID, general.ID)
+	assert.Equal(t, message.Msg, textToSend)
+	message.Msg = textToSend
+
 	messageChannel := make(chan models.Message, 1)
 
 	err := c.SubscribeToMessageStream(&general, messageChannel)
@@ -20,7 +27,7 @@ func TestClient_SubscribeToMessageStream(t *testing.T) {
 	assert.NotNil(t, messageChannel, "Function didn't returned general")
 
 	go func() {
-		sendAndAssertNoError(t, c, &general, textToSend)
+		sendAndAssertNoError(t, c, message)
 		// sendAndAssertNoError(t, c, &general, textToSend)
 		// sendAndAssertNoError(t, c, &general, textToSend)
 	}()
@@ -42,8 +49,8 @@ func assertMessage(t *testing.T, message models.Message) {
 	assert.NotNil(t, message.User.UserName, "Username was not set")
 }
 
-func sendAndAssertNoError(t *testing.T, c *Client, channel *models.Channel, text string) {
-	m, err := c.SendMessage(channel, text)
+func sendAndAssertNoError(t *testing.T, c *Client, message *models.Message) {
+	m, err := c.SendMessage(message)
 	assert.Nil(t, err, "Error while sending message")
 	assert.NotNil(t, m, "SendMessage should return a Message object")
 }
