@@ -30,6 +30,29 @@ func (c *Client) Sub(name string, args ...interface{}) (chan string, error) {
 	return msgChannel, nil
 }
 
+func (c *Client) SubNotifyUser(userID, event string) (chan map[string]interface{}, error) {
+
+	if err := c.ddp.Sub("stream-notify-user", userID+"/"+event, true); err != nil {
+		return nil, err
+	}
+
+	msgChannel := make(chan map[string]interface{}, 1)
+	c.ddp.CollectionByName("stream-notify-user").AddUpdateListener(notificationExtractor{msgChannel, "update"})
+
+	return msgChannel, nil
+}
+
+type notificationExtractor struct {
+	messageChannel chan map[string]interface{}
+	operation      string
+}
+
+func (u notificationExtractor) CollectionUpdate(collection, operation, id string, doc ddp.Update) {
+	if operation == u.operation {
+		u.messageChannel <- doc
+	}
+}
+
 type genericExtractor struct {
 	messageChannel chan string
 	operation      string
