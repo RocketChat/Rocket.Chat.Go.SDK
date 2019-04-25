@@ -36,7 +36,7 @@ func (c *Client) SubNotifyUser(userID, event string) (chan map[string]interface{
 		return nil, err
 	}
 
-	msgChannel := make(chan map[string]interface{}, default_buffer_size)
+	msgChannel := make(chan map[string]interface{}, 1000)
 	c.ddp.CollectionByName("stream-notify-user").AddUpdateListener(notificationExtractor{msgChannel, "update"})
 
 	return msgChannel, nil
