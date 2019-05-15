@@ -20,10 +20,10 @@ type CreateUserRequest struct {
 type UpdateUserRequest struct {
 	UserID string `json:"userId"`
 	Data   struct {
-		Name         string            `json:"name"`
-		Email        string            `json:"email"`
-		Password     string            `json:"password"`
-		Username     string            `json:"username"`
+		Name         string            `json:"name,omitempty"`
+		Email        string            `json:"email,omitempty"`
+		Password     string            `json:"password,omitempty"`
+		Username     string            `json:"username,omitempty"`
 		CustomFields map[string]string `json:"customFields,omitempty"`
 	} `json:"data"`
 }
