@@ -31,13 +31,31 @@ func (c *Client) NewMessage(channel *models.Channel, text string) *models.Messag
 // Takes roomID
 //
 // https://rocket.chat/docs/developer-guides/realtime-api/method-calls/load-history
-func (c *Client) LoadHistory(roomID string) error {
-	_, err := c.ddp.Call("loadHistory", roomID)
+func (c *Client) LoadHistory(roomID string) ([]models.Message, error) {
+	m, err := c.ddp.Call("loadHistory", roomID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	history := m.(map[string]interface{})
+
+	document, _ := gabs.Consume(history["messages"])
+	msgs, err := document.Children()
+
+	if err != nil {
+		log.Printf("response is in an unexpected format: %v", err)
+		return make([]models.Message, 0), nil
+	}
+
+	messages := make([]models.Message, len(msgs))
+
+	for i, arg := range msgs {
+		messages[i] = *getMessageFromDocument(arg)
+	}
+
+	//log.Println(messages)
+
+	return messages, nil
 }
 
 // SendMessage sends message to channel
