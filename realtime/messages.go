@@ -234,6 +234,7 @@ func getMessageFromDocument(arg *gabs.Container) *models.Message {
 		ID:        stringOrZero(arg.Path("_id").Data()),
 		RoomID:    stringOrZero(arg.Path("rid").Data()),
 		Msg:       stringOrZero(arg.Path("msg").Data()),
+		Type:      stringOrZero(arg.Path("t").Data()),
 		Timestamp: ts,
 		User: &models.User{
 			ID:       stringOrZero(arg.Path("u._id").Data()),
