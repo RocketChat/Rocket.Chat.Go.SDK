@@ -7,6 +7,7 @@ type Message struct {
 	RoomID   string `json:"rid"`
 	Msg      string `json:"msg"`
 	EditedBy string `json:"editedBy,omitempty"`
+	Type     string `json:"t,omitempty"`
 
 	Groupable bool `json:"groupable,omitempty"`
 
