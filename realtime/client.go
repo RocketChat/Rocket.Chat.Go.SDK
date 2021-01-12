@@ -1,24 +1,28 @@
-// Provides access to Rocket.Chat's realtime API via ddp
+//Package realtime provides access to Rocket.Chat's realtime API via ddp
 package realtime
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/gopackage/ddp"
+	"github.com/sony/sonyflake"
 )
 
 type Client struct {
 	ddp *ddp.Client
+	sf  *sonyflake.Sonyflake
 }
 
-// Creates a new instance and connects to the websocket.
+//NewClient creates a new instance and connects to the websocket.
 func NewClient(serverURL *url.URL, debug bool) (*Client, error) {
-	rand.Seed(time.Now().UTC().UnixNano())
+	sf := sonyflake.NewSonyflake(sonyflake.Settings{})
+	if sf == nil {
+		return nil, errors.New("random id generator failed to be created")
+	}
 
 	wsURL := "ws"
 	port := 80
@@ -38,6 +42,7 @@ func NewClient(serverURL *url.URL, debug bool) (*Client, error) {
 
 	c := new(Client)
 	c.ddp = ddp.NewClient(wsURL, serverURL.String())
+	c.sf = sf
 
 	if debug {
 		c.ddp.SetSocketLogActive(true)
@@ -93,5 +98,10 @@ func (c *Client) Close() {
 
 // Some of the rocketchat objects need unique IDs specified by the client
 func (c *Client) newRandomId() string {
-	return fmt.Sprintf("%f", rand.Float64())
+	id, err := c.sf.NextID()
+	if err != nil {
+		log.Fatalf("failed to create a unique id: %v", err.Error())
+	}
+
+	return fmt.Sprintf("go%d", id)
 }
