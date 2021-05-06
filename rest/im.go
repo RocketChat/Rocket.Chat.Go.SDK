@@ -14,7 +14,7 @@ type DirectMessageResponse struct {
 type Room struct {
 	ID        string   `json:"_id"`
 	Rid       string   `json:"rid"`
-	T         string   `json:"t"`
+	Type         string   `json:"t"`
 	Usernames []string `json:"usernames"`
 }
 

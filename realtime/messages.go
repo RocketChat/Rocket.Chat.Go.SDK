@@ -281,7 +281,6 @@ func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc
 	if operation == u.operation {
 		msgs := getMessagesFromUpdateEvent(doc)
 		for _, m := range msgs {
-			log.Println("message received", m.Msg)
 			u.messageChannel <- m
 		}
 	}
