@@ -50,6 +50,31 @@ type CreateUserResponse struct {
 	} `json:"user"`
 }
 
+type UserStatusResponse struct {
+	ID               string `json:"_id"`
+	ConnectionStatus string `json:"connectionStatus"`
+	Message          string `json:"message"`
+	Status           string `json:"status"`
+	Error            string `json:"error"`
+	Success          bool   `json:"success"`
+}
+
+func (s UserStatusResponse) OK() error {
+	if s.Success {
+		return nil
+	}
+
+	if len(s.Error) > 0 {
+		return fmt.Errorf(s.Error)
+	}
+
+	if len(s.Message) > 0 {
+		return fmt.Errorf("status: %s, message: %s", s.Status, s.Message)
+	}
+
+	return ResponseErr
+}
+
 // Login a user. The Email and the Password are mandatory. The auth token of the user is stored in the Client instance.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/authentication/login
@@ -141,5 +166,15 @@ func (c *Client) SetUserAvatar(userID, username, avatarURL string) (*Status, err
 	body := fmt.Sprintf(`{ "userId": "%s","username": "%s","avatarUrl":"%s"}`, userID, username, avatarURL)
 	response := new(Status)
 	err := c.Post("users.setAvatar", bytes.NewBufferString(body), response)
+	return response, err
+}
+
+func (c *Client) GetUserStatus(username string) (*UserStatusResponse, error) {
+	params := url.Values{
+		"username": []string{username},
+	}
+
+	response := new(UserStatusResponse)
+	err := c.Get("users.getStatus", params, response)
 	return response, err
 }

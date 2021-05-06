@@ -197,6 +197,20 @@ func (c *Client) SubscribeToMessageStream(channel *models.Channel, msgChannel ch
 	return nil
 }
 
+// This will subscribe to all messages that you need as a bot
+func (c *Client) SubscribeToMyMessages(msgChannel chan models.Message) error {
+	if err := c.ddp.Sub("stream-room-messages", "__my_messages__", send_added_event); err != nil {
+		return err
+	}
+
+	if !messageListenerAdded {
+		c.ddp.CollectionByName("stream-room-messages").AddUpdateListener(messageExtractor{msgChannel, "update"})
+		messageListenerAdded = true
+	}
+
+	return nil
+}
+
 func getMessagesFromUpdateEvent(update ddp.Update) []models.Message {
 	document, _ := gabs.Consume(update["args"])
 	args, err := document.Children()
@@ -267,6 +281,7 @@ func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc
 	if operation == u.operation {
 		msgs := getMessagesFromUpdateEvent(doc)
 		for _, m := range msgs {
+			log.Println("message received", m.Msg)
 			u.messageChannel <- m
 		}
 	}

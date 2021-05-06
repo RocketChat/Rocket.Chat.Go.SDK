@@ -54,7 +54,6 @@ func (c *Client) GetPrivateGroups() (*GroupsResponse, error) {
 	return response, nil
 }
 
-
 // GetJoinedChannels returns all channels that the user has joined.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list-joined
