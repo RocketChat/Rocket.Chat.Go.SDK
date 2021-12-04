@@ -59,6 +59,10 @@ type UserStatusResponse struct {
 	Success          bool   `json:"success"`
 }
 
+type UserSetStatusResponse struct {
+	Status
+}
+
 func (s UserStatusResponse) OK() error {
 	if s.Success {
 		return nil
@@ -176,5 +180,16 @@ func (c *Client) GetUserStatus(username string) (*UserStatusResponse, error) {
 
 	response := new(UserStatusResponse)
 	err := c.Get("users.getStatus", params, response)
+	return response, err
+}
+
+func (c *Client) SetUserStatus(req *models.SetUserStatus) (*UserSetStatusResponse, error) {
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(UserSetStatusResponse)
+	err = c.Post("users.setStatus", bytes.NewBuffer(body), response)
 	return response, err
 }
