@@ -244,6 +244,15 @@ func getMessageFromDocument(arg *gabs.Container) *models.Message {
 			ts = &t
 		}
 	}
+	var mentions = make([]models.User, 0)
+
+	if docMentions, err := arg.Path("mentions").Children(); err == nil {
+		for _, gabContainer := range docMentions {
+			usr := getUserFromData(gabContainer.Data())
+			mentions = append(mentions, *usr)
+		}
+	}
+
 	return &models.Message{
 		ID:        stringOrZero(arg.Path("_id").Data()),
 		RoomID:    stringOrZero(arg.Path("rid").Data()),
@@ -254,6 +263,7 @@ func getMessageFromDocument(arg *gabs.Container) *models.Message {
 			ID:       stringOrZero(arg.Path("u._id").Data()),
 			UserName: stringOrZero(arg.Path("u.username").Data()),
 		},
+		Mentions: mentions,
 	}
 }
 

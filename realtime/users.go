@@ -85,8 +85,15 @@ func getUserFromData(data interface{}) *models.User {
 	document, _ := gabs.Consume(data)
 
 	expires, _ := strconv.ParseFloat(stringOrZero(document.Path("tokenExpires.$date").Data()), 64)
+	// In the login resp the field is called id while for mentions its _id. Should resolve itself when typing the responses
+	userId := stringOrZero(document.Path("id").Data())
+	if userId == "" {
+		userId = stringOrZero(document.Path("_id").Data())
+	}
 	return &models.User{
-		ID:           stringOrZero(document.Path("id").Data()),
+		ID:           userId,
+		Name:         stringOrZero(document.Path("name").Data()),
+		UserName:     stringOrZero(document.Path("username").Data()),
 		Token:        stringOrZero(document.Path("token").Data()),
 		TokenExpires: int64(expires),
 	}
