@@ -13,8 +13,9 @@ import (
 )
 
 type Client struct {
-	ddp *ddp.Client
-	sf  *sonyflake.Sonyflake
+	ddp                  *ddp.Client
+	sf                   *sonyflake.Sonyflake
+	messageListenerAdded bool
 }
 
 //NewClient creates a new instance and connects to the websocket.
