@@ -19,6 +19,8 @@ type Message struct {
 	User     *User  `json:"u,omitempty"`
 	PostMessage
 
+	Reactions   map[string][]string
+	Attachments []Attachment `json:"attachments,omitempty"`
 	// Bot         interface{}  `json:"bot"`
 	// CustomFields interface{} `json:"customFields"`
 	// Channels           []interface{} `json:"channels"`

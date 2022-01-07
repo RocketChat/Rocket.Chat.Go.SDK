@@ -3,12 +3,14 @@ package realtime
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"strconv"
 	"time"
 
 	"github.com/Jeffail/gabs"
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 	"github.com/gopackage/ddp"
+	"github.com/mitchellh/mapstructure"
 )
 
 const (
@@ -282,6 +284,97 @@ func stringOrZero(i interface{}) string {
 	}
 }
 
+func ToTimeHookFunc() mapstructure.DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{}) (interface{}, error) {
+		if t != reflect.TypeOf(time.Time{}) {
+			return data, nil
+		}
+
+		switch f.Kind() {
+		case reflect.String:
+			return time.Parse(time.RFC3339, data.(string))
+		case reflect.Float64:
+			return time.Unix(0, int64(data.(float64))*int64(time.Millisecond)), nil
+		case reflect.Int64:
+			return time.Unix(0, data.(int64)*int64(time.Millisecond)), nil
+		default:
+			return data, nil
+		}
+		// Convert it by parsing
+	}
+}
+
+func getReactionsFromMessage(container *gabs.Container) map[string][]string {
+	outputMap := make(map[string][]string)
+	reactions, err := container.Path("reactions").ChildrenMap()
+	if err != nil {
+		return outputMap
+	}
+	for emoji, emoContainer := range reactions {
+		if _, ok := outputMap[emoji]; ok {
+			userList, err := emoContainer.Path("usernames").Children()
+			if err != nil {
+				log.Fatal(err)
+			}
+			print(userList)
+			outputMap[emoji] = append(outputMap[emoji])
+		} else {
+			outputMap[emoji] = make([]string, 0, 1)
+
+			userList, err := emoContainer.Path("usernames").Children()
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, user := range userList {
+				outputMap[emoji] = append(outputMap[emoji], stringOrZero(user.Data()))
+			}
+		}
+	}
+	return outputMap
+}
+
+func getTypedMessagesFromUpdateEvent(update ddp.Update) []models.Message {
+
+	decoderConfig := mapstructure.DecoderConfig{TagName: "json", DecodeHook: mapstructure.ComposeDecodeHookFunc(
+		ToTimeHookFunc()), WeaklyTypedInput: true}
+
+	result := make([]models.Message, 0)
+	updateArgs := update["args"].([]interface{})
+
+	var myRoomInfo models.RoomInfo
+	decoderConfig.Result = &myRoomInfo
+	mapDecoder, err := mapstructure.NewDecoder(&decoderConfig)
+	if err != nil {
+		panic(err)
+	}
+	mapDecoder.Decode(updateArgs[1])
+
+	var myMessage models.Message
+	decoderConfig.Result = &myMessage
+	mapDecoder.Decode(updateArgs[0])
+
+	myMessage.Type = myRoomInfo.RoomType
+	var ts *time.Time
+	rawTimestamp, err := gabs.Consume(updateArgs[0])
+	date := stringOrZero(rawTimestamp.Path("ts.$date").Data())
+	if len(date) > 0 {
+		if ti, err := strconv.ParseFloat(date, 64); err == nil {
+			t := time.Unix(int64(ti)/1e3, int64(ti)%1e3)
+			ts = &t
+		}
+	}
+
+	reactions := getReactionsFromMessage(rawTimestamp)
+	myMessage.Timestamp = ts
+	myMessage.UpdatedAt = ts
+	myMessage.Reactions = reactions
+	result = append(result, myMessage)
+	return result
+}
+
 type messageExtractor struct {
 	messageChannel chan models.Message
 	operation      string
@@ -289,9 +382,12 @@ type messageExtractor struct {
 
 func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc ddp.Update) {
 	if operation == u.operation {
-		msgs := getMessagesFromUpdateEvent(doc)
+		msgs := getTypedMessagesFromUpdateEvent(doc)
+		//msgs := getMessagesFromUpdateEvent(doc)
 		for _, m := range msgs {
 			u.messageChannel <- m
 		}
+	} else {
+		log.Printf("Got another operation: %v", operation)
 	}
 }
