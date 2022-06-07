@@ -6,24 +6,6 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
-type InfoResponse struct {
-	Status
-	Info models.Info `json:"info"`
-}
-
-// GetServerInfo a simple method, requires no authentication,
-// that returns information about the server including version information.
-//
-// https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/info
-func (c *Client) GetServerInfo() (*models.Info, error) {
-	response := new(InfoResponse)
-	if err := c.Get("info", nil, response); err != nil {
-		return nil, err
-	}
-
-	return &response.Info, nil
-}
-
 type DirectoryResponse struct {
 	Status
 	models.Directory
