@@ -12,3 +12,7 @@
 *.out
 
 vendor/
+
+# Docker volumes
+data
+uploads
