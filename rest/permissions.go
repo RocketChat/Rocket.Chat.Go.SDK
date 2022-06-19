@@ -3,6 +3,7 @@ package rest
 import (
 	"bytes"
 	"encoding/json"
+
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
@@ -15,9 +16,9 @@ type UpdatePermissionsResponse struct {
 	Permissions []models.Permission `json:"permissions"`
 }
 
-// UpdatePermissions updates permissions
+// UpdatePermissions edits permissions on the server.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/permissions/update/
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/permissions-endpoints/update-permissions
 func (c *Client) UpdatePermissions(req *UpdatePermissionsRequest) (*UpdatePermissionsResponse, error) {
 	body, err := json.Marshal(req)
 	if err != nil {

@@ -28,18 +28,11 @@ type logonResponse struct {
 type CreateUserResponse struct {
 	Status
 	User struct {
-		ID        string    `json:"_id"`
-		CreatedAt time.Time `json:"createdAt"`
-		Services  struct {
-			Password struct {
-				Bcrypt string `json:"bcrypt"`
-			} `json:"password"`
-		} `json:"services"`
-		Username string `json:"username"`
-		Emails   []struct {
-			Address  string `json:"address"`
-			Verified bool   `json:"verified"`
-		} `json:"emails"`
+		ID           string            `json:"_id"`
+		CreatedAt    time.Time         `json:"createdAt"`
+		Services     services          `json:"services"`
+		Username     string            `json:"username"`
+		Emails       []email           `json:"emails"`
 		Type         string            `json:"type"`
 		Status       string            `json:"status"`
 		Active       bool              `json:"active"`
@@ -48,6 +41,17 @@ type CreateUserResponse struct {
 		Name         string            `json:"name"`
 		CustomFields map[string]string `json:"customFields"`
 	} `json:"user"`
+}
+
+type services struct {
+	Password struct {
+		Bcrypt string `json:"bcrypt"`
+	} `json:"password"`
+}
+
+type email struct {
+	Address  string `json:"address"`
+	Verified bool   `json:"verified"`
 }
 
 type UserStatusResponse struct {
@@ -75,9 +79,10 @@ func (s UserStatusResponse) OK() error {
 	return ResponseErr
 }
 
-// Login a user. The Email and the Password are mandatory. The auth token of the user is stored in the Client instance.
+// Login authenticates user with email and password.
+// The auth token of the user is stored in the Client instance.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/authentication/login
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/other-important-endpoints/authentication-endpoints/login
 func (c *Client) Login(credentials *models.UserCredentials) error {
 	if c.auth != nil {
 		return nil
@@ -99,23 +104,10 @@ func (c *Client) Login(credentials *models.UserCredentials) error {
 	return nil
 }
 
-// CreateToken creates an access token for a user
+// Logout logs user out.
+// Returns the response message of the server.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/users/createtoken/
-func (c *Client) CreateToken(userID, username string) (*models.UserCredentials, error) {
-	response := new(logonResponse)
-	data := url.Values{"userId": {userID}, "username": {username}}
-	if err := c.PostForm("users.createToken", data, response); err != nil {
-		return nil, err
-	}
-	credentials := &models.UserCredentials{}
-	credentials.ID, credentials.Token = response.Data.UserID, response.Data.Token
-	return credentials, nil
-}
-
-// Logout a user. The function returns the response message of the server.
-//
-// https://rocket.chat/docs/developer-guides/rest-api/authentication/logout
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/users-endpoints/logout-user-endpoint
 func (c *Client) Logout() (string, error) {
 
 	if c.auth == nil {
@@ -130,9 +122,26 @@ func (c *Client) Logout() (string, error) {
 	return response.Data.Message, nil
 }
 
-// CreateUser being logged in with a user that has permission to do so.
+// CreateToken creates a user authentication token.
+// This is the same type of session token a user would get via login and will expire the same way.
+// Requires user-generate-access-token permission.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/users/create
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/users-endpoints/create-users-token
+func (c *Client) CreateToken(userID, username string) (*models.UserCredentials, error) {
+	response := new(logonResponse)
+	data := url.Values{"userId": {userID}, "username": {username}}
+	if err := c.PostForm("users.createToken", data, response); err != nil {
+		return nil, err
+	}
+	credentials := &models.UserCredentials{}
+	credentials.ID, credentials.Token = response.Data.UserID, response.Data.Token
+	return credentials, nil
+}
+
+// CreateUser creates a new user.
+// Requires create-user permission.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/users-endpoints/create-user
 func (c *Client) CreateUser(req *models.CreateUserRequest) (*CreateUserResponse, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -144,9 +153,10 @@ func (c *Client) CreateUser(req *models.CreateUserRequest) (*CreateUserResponse,
 	return response, err
 }
 
-// UpdateUser updates a user's data being logged in with a user that has permission to do so.
+// UpdateUser updates a user's data.
+// Caller must have permission to do so.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/users/update/
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/users-endpoints/update-user
 func (c *Client) UpdateUser(req *models.UpdateUserRequest) (*CreateUserResponse, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -158,10 +168,11 @@ func (c *Client) UpdateUser(req *models.UpdateUserRequest) (*CreateUserResponse,
 	return response, err
 }
 
-// SetUserAvatar updates a user's avatar being logged in with a user that has permission to do so.
+// SetUserAvatar updates a user's avatar.
+// Caller must have permission to do so.
 // Currently only passing an URL is possible.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/users/setavatar/
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/users-endpoints/set-avatar
 func (c *Client) SetUserAvatar(userID, username, avatarURL string) (*Status, error) {
 	body := fmt.Sprintf(`{ "userId": "%s","username": "%s","avatarUrl":"%s"}`, userID, username, avatarURL)
 	response := new(Status)
@@ -169,6 +180,9 @@ func (c *Client) SetUserAvatar(userID, username, avatarURL string) (*Status, err
 	return response, err
 }
 
+// GetUserStatus gets a user's status.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/users-endpoints/get-status
 func (c *Client) GetUserStatus(username string) (*UserStatusResponse, error) {
 	params := url.Values{
 		"username": []string{username},
