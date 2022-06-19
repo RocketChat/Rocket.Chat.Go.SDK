@@ -66,8 +66,9 @@ type StatisticsResponse struct {
 }
 
 // GetStatistics returns statistics about the Rocket.Chat server.
+// Requires view-statistics permission.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/statistics
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/stats-endpoints/get-statistics
 func (c *Client) GetStatistics() (*models.StatisticsInfo, error) {
 	response := new(StatisticsResponse)
 	if err := c.Get("statistics", nil, response); err != nil {
