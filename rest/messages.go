@@ -21,6 +21,11 @@ type MessageResponse struct {
 	Message models.Message `json:"message"`
 }
 
+type DeleteMessageResponse struct {
+	Status
+	Message models.Message
+}
+
 // Sends a message to a channel. The name of the channel has to be not nil.
 // The message will be html escaped.
 //
@@ -45,6 +50,22 @@ func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) 
 	return response, err
 }
 
+// GetMessage retrieves a single chat message by the provided id.
+// Callee must have permission to access the room where the message resides.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/getmessage
+
+func (c *Client) GetMessage(msgId string) (models.Message, error) {
+	params := url.Values{
+		"msgId": []string{msgId},
+	}
+	response := new(MessageResponse)
+	if err := c.Get("chat.getMessage", params, response); err != nil {
+		return models.Message{}, err
+	}
+	return response.Message, nil
+}
+
 // Get messages from a channel. The channel id has to be not nil. Optionally a
 // count can be specified to limit the size of the returned messages.
 //
@@ -64,4 +85,18 @@ func (c *Client) GetMessages(channel *models.Channel, page *models.Pagination) (
 	}
 
 	return response.Messages, nil
+}
+
+// DeleteMessage deletes a specific message.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/delete
+func (c *Client) DeleteMessage(msg *models.DeleteMessage) (*DeleteMessageResponse, error) {
+	body, err := json.Marshal(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(DeleteMessageResponse)
+	err = c.Post("chat.delete", bytes.NewBuffer(body), response)
+	return response, err
 }

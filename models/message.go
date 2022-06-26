@@ -25,6 +25,15 @@ type Message struct {
 	// SandstormSessionID interface{} `json:"sandstormSessionId"`
 }
 
+// DeleteMessage is payload for chat.delete endpoint
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/delete
+type DeleteMessage struct {
+	RoomID string `json:"roomId"`
+	MsgID  string `json:"msgId"`
+	AsUser bool   `json:"asUser"`
+}
+
 // PostMessage Payload for postmessage rest API
 //
 // https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage/
