@@ -35,9 +35,34 @@ func TestRocket_GetMessage(t *testing.T) {
 	assert.Equal(t, text, msg.Msg)
 }
 
+func TestRocket_UpdateUser(t *testing.T) {
+	rocket := getDefaultClient(t)
+	textOriginal := "TestRocket_UpdateMessageOriginal"
+	textUpdated := "TestRocket_UpdateMessageUpdated"
+	postMessage := &models.PostMessage{
+		Channel: "general",
+		Text:    textOriginal,
+	}
+	postResp, err := rocket.PostMessage(postMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, postResp)
+
+	roomId := postResp.Message.RoomID
+	msgId := postResp.Message.ID
+	updateMessage := &models.UpdateMessage{
+		RoomID: roomId,
+		MsgID:  msgId,
+		Text:   textUpdated,
+	}
+	resp, err := rocket.UpdateMessage(updateMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, textUpdated, resp.Message.Msg)
+}
+
 func TestRocket_DeleteMessage(t *testing.T) {
 	rocket := getDefaultClient(t)
-	t.Run("asUser", func(t *testing.T) {
+	t.Run("asUser = true", func(t *testing.T) {
 		text := "TestRocket_DeleteMessageAsUser"
 		postMessage := &models.PostMessage{
 			Channel: "general",
@@ -53,6 +78,27 @@ func TestRocket_DeleteMessage(t *testing.T) {
 			RoomID: roomId,
 			MsgID:  msgId,
 			AsUser: true,
+		}
+		resp, err := rocket.DeleteMessage(deleteMessage)
+		assert.Nil(t, err)
+		assert.NotNil(t, resp)
+	})
+	t.Run("asUser = false", func(t *testing.T) {
+		text := "TestRocket_DeleteMessageNotAsUser"
+		postMessage := &models.PostMessage{
+			Channel: "general",
+			Text:    text,
+		}
+		postResp, err := rocket.PostMessage(postMessage)
+		assert.Nil(t, err)
+		assert.NotNil(t, postResp)
+
+		roomId := postResp.Message.RoomID
+		msgId := postResp.Message.ID
+		deleteMessage := &models.DeleteMessage{
+			RoomID: roomId,
+			MsgID:  msgId,
+			AsUser: false,
 		}
 		resp, err := rocket.DeleteMessage(deleteMessage)
 		assert.Nil(t, err)

@@ -87,6 +87,21 @@ func (c *Client) GetMessages(channel *models.Channel, page *models.Pagination) (
 	return response.Messages, nil
 }
 
+// UpdateMessage updates a specific message.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/message-update
+func (c *Client) UpdateMessage(msg *models.UpdateMessage) (*MessageResponse, error) {
+	body, err := json.Marshal(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(MessageResponse)
+	err = c.Post("chat.update", bytes.NewBuffer(body), response)
+	return response, err
+
+}
+
 // DeleteMessage deletes a specific message.
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/delete

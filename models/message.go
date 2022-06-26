@@ -25,6 +25,15 @@ type Message struct {
 	// SandstormSessionID interface{} `json:"sandstormSessionId"`
 }
 
+// UpdateMessage is payload for chat.update
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/message-update
+type UpdateMessage struct {
+	RoomID string `json:"roomId"`
+	MsgID  string `json:"msgId"`
+	Text   string `json:"text"`
+}
+
 // DeleteMessage is payload for chat.delete endpoint
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/delete
