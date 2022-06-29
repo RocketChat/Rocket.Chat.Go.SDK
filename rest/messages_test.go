@@ -35,6 +35,31 @@ func TestRocket_GetMessage(t *testing.T) {
 	assert.Equal(t, text, msg.Msg)
 }
 
+func TestRocket_GetMentionedMessages(t *testing.T) {
+	rocket := getDefaultClient(t)
+	text := "TestRocket_GetMentionedMessages @all"
+	postMessage := &models.PostMessage{
+		Channel: "general",
+		Text:    text,
+	}
+	postResp, err := rocket.PostMessage(postMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, postResp)
+
+	general := &models.Channel{ID: "GENERAL", Name: "general"}
+	mentionedMessages, err := rocket.GetMentionedMessages(general, nil)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(mentionedMessages))
+
+	// delete mentioned messages so tests are idempotent
+	msgId := mentionedMessages[0].ID
+	roomId := mentionedMessages[0].RoomID
+	deleteMessage := &models.DeleteMessage{MsgID: msgId, RoomID: roomId, AsUser: true}
+	msg, err := rocket.DeleteMessage(deleteMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, msg)
+}
+
 func TestRocket_UpdateUser(t *testing.T) {
 	rocket := getDefaultClient(t)
 	textOriginal := "TestRocket_UpdateMessageOriginal"
@@ -104,6 +129,32 @@ func TestRocket_DeleteMessage(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, resp)
 	})
+}
+
+func TestRocket_SearchMessages(t *testing.T) {
+	rocket := getDefaultClient(t)
+	text := "TestRocket_SearchMessages"
+	postMessage := &models.PostMessage{
+		Channel: "general",
+		Text:    text,
+	}
+	postResp, err := rocket.PostMessage(postMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, postResp)
+
+	general := &models.Channel{ID: "GENERAL", Name: "general"}
+	searchMessages, err := rocket.SearchMessages(general, text)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(searchMessages))
+	assert.Equal(t, text, searchMessages[0].Msg)
+
+	// delete mentioned messages so tests are idempotent
+	msgId := searchMessages[0].ID
+	roomId := searchMessages[0].RoomID
+	deleteMessage := &models.DeleteMessage{MsgID: msgId, RoomID: roomId, AsUser: true}
+	msg, err := rocket.DeleteMessage(deleteMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, msg)
 }
 
 func TestRocket_SendAndReceive(t *testing.T) {

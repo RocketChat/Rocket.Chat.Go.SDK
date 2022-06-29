@@ -77,10 +77,33 @@ func (c *Client) GetMessages(channel *models.Channel, page *models.Pagination) (
 
 	if page != nil {
 		params.Add("count", strconv.Itoa(page.Count))
+		params.Add("offset", strconv.Itoa(page.Offset))
 	}
 
 	response := new(MessagesResponse)
 	if err := c.Get("channels.history", params, response); err != nil {
+		return nil, err
+	}
+
+	return response.Messages, nil
+}
+
+// GetMentionedMessages retrieves mentioned messages.
+// It supports the Offset and Count Query Parameters.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/getmentionedmessages
+func (c *Client) GetMentionedMessages(channel *models.Channel, page *models.Pagination) ([]models.Message, error) {
+	params := url.Values{
+		"roomId": []string{channel.ID},
+	}
+
+	if page != nil {
+		params.Add("count", strconv.Itoa(page.Count))
+		params.Add("offset", strconv.Itoa(page.Offset))
+	}
+
+	response := new(MessagesResponse)
+	if err := c.Get("chat.getMentionedMessages", params, response); err != nil {
 		return nil, err
 	}
 
@@ -114,4 +137,20 @@ func (c *Client) DeleteMessage(msg *models.DeleteMessage) (*DeleteMessageRespons
 	response := new(DeleteMessageResponse)
 	err = c.Post("chat.delete", bytes.NewBuffer(body), response)
 	return response, err
+}
+
+// SearchMessages searches for messages in a channel by id and text message
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/search-message
+
+func (c *Client) SearchMessages(channel *models.Channel, searchText string) ([]models.Message, error) {
+	params := url.Values{
+		"roomId":     []string{channel.ID},
+		"searchText": []string{searchText},
+	}
+	response := new(MessagesResponse)
+	if err := c.Get("chat.search", params, response); err != nil {
+		return nil, err
+	}
+	return response.Messages, nil
 }
