@@ -14,13 +14,13 @@ type DirectMessageResponse struct {
 type Room struct {
 	ID        string   `json:"_id"`
 	Rid       string   `json:"rid"`
-	Type         string   `json:"t"`
+	Type      string   `json:"t"`
 	Usernames []string `json:"usernames"`
 }
 
-// Creates a DirectMessage
+// CreateDirectMessage creates a direct message session with another user.
 //
-// https://developer.rocket.chat/api/rest-api/methods/im/create
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/im-endpoints/create
 func (c *Client) CreateDirectMessage(username string) (*Room, error) {
 	body := fmt.Sprintf(`{ "username": "%s" }`, username)
 	resp := new(DirectMessageResponse)

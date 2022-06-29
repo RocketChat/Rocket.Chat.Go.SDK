@@ -30,9 +30,9 @@ type GroupResponse struct {
 	Group models.Channel `json:"group"`
 }
 
-// GetPublicChannels returns all channels that can be seen by the logged in user.
+// GetPublicChannels lists all of the channels on the server.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/channels/list
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/list
 func (c *Client) GetPublicChannels() (*ChannelsResponse, error) {
 	response := new(ChannelsResponse)
 	if err := c.Get("channels.list", nil, response); err != nil {
@@ -42,9 +42,9 @@ func (c *Client) GetPublicChannels() (*ChannelsResponse, error) {
 	return response, nil
 }
 
-// GetPrivateGroups returns all channels that can be seen by the logged in user.
+// GetPrivateGroups lists all of the private groups the calling user has joined.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/groups/list
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/groups-endpoints/list
 func (c *Client) GetPrivateGroups() (*GroupsResponse, error) {
 	response := new(GroupsResponse)
 	if err := c.Get("groups.list", nil, response); err != nil {
@@ -54,9 +54,9 @@ func (c *Client) GetPrivateGroups() (*GroupsResponse, error) {
 	return response, nil
 }
 
-// GetJoinedChannels returns all channels that the user has joined.
+// GetJoinedChannels lists all of the channels the calling user has joined.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/channels/list-joined
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/list-joined
 func (c *Client) GetJoinedChannels(params url.Values) (*ChannelsResponse, error) {
 	response := new(ChannelsResponse)
 	if err := c.Get("channels.list.joined", params, response); err != nil {
@@ -66,17 +66,18 @@ func (c *Client) GetJoinedChannels(params url.Values) (*ChannelsResponse, error)
 	return response, nil
 }
 
-// LeaveChannel leaves a channel. The id of the channel has to be not nil.
+// LeaveChannel causes the callee to be removed from the channel.
+// The id of the channel must not be nil.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/channels/leave
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/leave
 func (c *Client) LeaveChannel(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
 	return c.Post("channels.leave", bytes.NewBufferString(body), new(ChannelResponse))
 }
 
-// GetChannelInfo get information about a channel. That might be useful to update the usernames.
+// GetChannelInfo retrieves the information about the channel.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/channels/info
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/info
 func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error) {
 	response := new(ChannelResponse)
 	switch {
@@ -93,9 +94,9 @@ func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error
 	return &response.Channel, nil
 }
 
-// GetGroupInfo get information about a group. That might be useful to update the usernames.
+// GetGroupInfo retrieves the information about the private group, only if you're part of the group.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/groups/info
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/groups-endpoints/info
 func (c *Client) GetGroupInfo(channel *models.Channel) (*models.Channel, error) {
 	response := new(GroupResponse)
 	switch {
