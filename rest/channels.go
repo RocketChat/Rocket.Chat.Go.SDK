@@ -32,7 +32,7 @@ type GroupResponse struct {
 
 // GetPublicChannels lists all of the channels on the server.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/channels-endpoints/list
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/list
 func (c *Client) GetPublicChannels() (*ChannelsResponse, error) {
 	response := new(ChannelsResponse)
 	if err := c.Get("channels.list", nil, response); err != nil {
@@ -44,7 +44,7 @@ func (c *Client) GetPublicChannels() (*ChannelsResponse, error) {
 
 // GetPrivateGroups lists all of the private groups the calling user has joined.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/groups-endpoints/list
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/groups-endpoints/list
 func (c *Client) GetPrivateGroups() (*GroupsResponse, error) {
 	response := new(GroupsResponse)
 	if err := c.Get("groups.list", nil, response); err != nil {
@@ -56,7 +56,7 @@ func (c *Client) GetPrivateGroups() (*GroupsResponse, error) {
 
 // GetJoinedChannels lists all of the channels the calling user has joined.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/channels-endpoints/list-joined
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/list-joined
 func (c *Client) GetJoinedChannels(params url.Values) (*ChannelsResponse, error) {
 	response := new(ChannelsResponse)
 	if err := c.Get("channels.list.joined", params, response); err != nil {
@@ -69,7 +69,7 @@ func (c *Client) GetJoinedChannels(params url.Values) (*ChannelsResponse, error)
 // LeaveChannel causes the callee to be removed from the channel.
 // The id of the channel must not be nil.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/channels-endpoints/leave
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/leave
 func (c *Client) LeaveChannel(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
 	return c.Post("channels.leave", bytes.NewBufferString(body), new(ChannelResponse))
@@ -77,7 +77,7 @@ func (c *Client) LeaveChannel(channel *models.Channel) error {
 
 // GetChannelInfo retrieves the information about the channel.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/channels-endpoints/info
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/info
 func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error) {
 	response := new(ChannelResponse)
 	switch {
@@ -96,7 +96,7 @@ func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error
 
 // GetGroupInfo retrieves the information about the private group, only if you're part of the group.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/groups-endpoints/info
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/groups-endpoints/info
 func (c *Client) GetGroupInfo(channel *models.Channel) (*models.Channel, error) {
 	response := new(GroupResponse)
 	switch {

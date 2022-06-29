@@ -20,7 +20,7 @@ type Room struct {
 
 // CreateDirectMessage creates a direct message session with another user.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/im-endpoints/create
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/im-endpoints/create
 func (c *Client) CreateDirectMessage(username string) (*Room, error) {
 	body := fmt.Sprintf(`{ "username": "%s" }`, username)
 	resp := new(DirectMessageResponse)

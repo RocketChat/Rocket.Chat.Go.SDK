@@ -32,7 +32,7 @@ type DirectoryResponse struct {
 // GetDirectory a method, that searches by users or channels on all users and channels available on server.
 // It supports the Offset, Count, and Sort Query Parameters along with Query and Fields Query Parameters.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/miscellaneous-endpoints/directory
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/miscellaneous-endpoints/directory
 func (c *Client) GetDirectory(params url.Values) (*models.Directory, error) {
 	response := new(DirectoryResponse)
 	if err := c.Get("directory", params, response); err != nil {
@@ -50,7 +50,7 @@ type SpotlightResponse struct {
 // GetSpotlight searches for users or rooms that are visible to the user.
 // WARNING: It will only return rooms that user didn’t join yet.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/miscellaneous-endpoints/spotlight
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/miscellaneous-endpoints/spotlight
 func (c *Client) GetSpotlight(params url.Values) (*models.Spotlight, error) {
 	response := new(SpotlightResponse)
 	if err := c.Get("spotlight", params, response); err != nil {
@@ -68,7 +68,7 @@ type StatisticsResponse struct {
 // GetStatistics returns statistics about the Rocket.Chat server.
 // Requires view-statistics permission.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/stats-endpoints/get-statistics
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/stats-endpoints/get-statistics
 func (c *Client) GetStatistics() (*models.StatisticsInfo, error) {
 	response := new(StatisticsResponse)
 	if err := c.Get("statistics", nil, response); err != nil {
@@ -87,7 +87,7 @@ type StatisticsListResponse struct {
 // It supports the Offset, Count and Sort Query Parameters along with just the Fields and Query Parameters.
 // Requires view-statistics permission.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/miscellaneous-endpoints/statistics-list
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/miscellaneous-endpoints/statistics-list
 func (c *Client) GetStatisticsList(params url.Values) (*models.StatisticsList, error) {
 	response := new(StatisticsListResponse)
 	if err := c.Get("statistics.list", params, response); err != nil {

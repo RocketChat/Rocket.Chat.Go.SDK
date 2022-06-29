@@ -18,7 +18,7 @@ type UpdatePermissionsResponse struct {
 
 // UpdatePermissions edits permissions on the server.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/permissions-endpoints/update-permissions
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/permissions-endpoints/update-permissions
 func (c *Client) UpdatePermissions(req *UpdatePermissionsRequest) (*UpdatePermissionsResponse, error) {
 	body, err := json.Marshal(req)
 	if err != nil {

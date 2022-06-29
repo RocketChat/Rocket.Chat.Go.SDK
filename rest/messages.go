@@ -24,7 +24,7 @@ type MessageResponse struct {
 // Sends a message to a channel. The name of the channel has to be not nil.
 // The message will be html escaped.
 //
-// https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/postmessage
 func (c *Client) Send(channel *models.Channel, msg string) error {
 	body := fmt.Sprintf(`{ "channel": "%s", "text": "%s"}`, channel.Name, html.EscapeString(msg))
 	return c.Post("chat.postMessage", bytes.NewBufferString(body), new(MessageResponse))
@@ -33,7 +33,7 @@ func (c *Client) Send(channel *models.Channel, msg string) error {
 // PostMessage sends a message to a channel. The channel or roomId has to be not nil.
 // The message will be json encoded.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/chat-endpoints/postmessage
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/postmessage
 func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) {
 	body, err := json.Marshal(msg)
 	if err != nil {
@@ -48,7 +48,7 @@ func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) 
 // GetMessages retrieves the messages from a channel. The channel id has to be not nil.
 // Optionally count and offset can be specified to limit the size and start of the returned messages.
 //
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/team-collaboration-endpoints/channels-endpoints/history
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/history
 func (c *Client) GetMessages(channel *models.Channel, page *models.Pagination) ([]models.Message, error) {
 	params := url.Values{
 		"roomId": []string{channel.ID},
