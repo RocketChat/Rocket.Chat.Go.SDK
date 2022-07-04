@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -19,8 +20,18 @@ type ChannelResponse struct {
 	Channel models.Channel `json:"channel"`
 }
 
+// CreateChannel is payload for channels.create
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/create
+type CreateChannel struct {
+	ChannelName string   `json:"name"`
+	Members     []string `json:"members"`
+	ReadOnly    bool     `json:"readOnly"`
+}
+
 // GetPublicChannels returns all channels that can be seen by the logged in user.
 //
+
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list
 func (c *Client) GetPublicChannels() (*ChannelsResponse, error) {
 	response := new(ChannelsResponse)
@@ -68,4 +79,19 @@ func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error
 	}
 
 	return &response.Channel, nil
+}
+
+// CreateChannel creates a new public channel, optionally including specified users.
+// The channel creator is always included.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/create
+func (c *Client) CreateChannel(channel *CreateChannel) (*ChannelResponse, error) {
+	body, err := json.Marshal(channel)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(ChannelResponse)
+	err = c.Post("channels.create", bytes.NewBuffer(body), response)
+	return response, err
 }

@@ -45,3 +45,11 @@ func TestRocket_GetChannelInfo(t *testing.T) {
 	assert.NotEmpty(t, updatedChannelInfo.UpdatedAt)
 	assert.NotEmpty(t, updatedChannelInfo.Timestamp)
 }
+
+func TestRocket_CreateChannel(t *testing.T) {
+	rocket := getDefaultClient(t)
+
+	channel := &CreateChannel{ChannelName: "TestRocket_CreateChannel"}
+	_, err := rocket.CreateChannel(channel)
+	assert.Nil(t, err)
+}
