@@ -49,7 +49,25 @@ func TestRocket_GetChannelInfo(t *testing.T) {
 func TestRocket_CreateChannel(t *testing.T) {
 	rocket := getDefaultClient(t)
 
-	channel := &CreateChannel{ChannelName: "TestRocket_CreateChannel"}
+	// create channel with same name as testUserName so that channels aren't duplicated
+	channel := &CreateChannel{ChannelName: testUserName}
 	_, err := rocket.CreateChannel(channel)
+	assert.Nil(t, err)
+}
+
+func TestRocket_InviteChannel(t *testing.T) {
+	rocket := getDefaultClient(t)
+
+	// channel := &CreateChannel{ChannelName: "GENERAL"}
+	// resp, err := rocket.CreateChannel(channel)
+	// assert.Nil(t, err)
+
+	general := &models.Channel{ID: "GENERAL"}
+	// needs users.info to get userID
+	user, err := rocket.UserInfo(testUserName)
+	assert.Nil(t, err)
+
+	invitedUsers := []*models.User{user}
+	_, err = rocket.InviteChannel(general, invitedUsers)
 	assert.Nil(t, err)
 }

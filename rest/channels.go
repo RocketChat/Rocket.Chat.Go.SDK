@@ -29,6 +29,11 @@ type CreateChannel struct {
 	ReadOnly    bool     `json:"readOnly"`
 }
 
+type channelInvite struct {
+	RoomId  string   `json:"roomId"`
+	UserIds []string `json:"userIds"`
+}
+
 // GetPublicChannels returns all channels that can be seen by the logged in user.
 //
 
@@ -93,5 +98,24 @@ func (c *Client) CreateChannel(channel *CreateChannel) (*ChannelResponse, error)
 
 	response := new(ChannelResponse)
 	err = c.Post("channels.create", bytes.NewBuffer(body), response)
+	return response, err
+}
+
+// InviteChannel adds users to the channel.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/invite
+func (c *Client) InviteChannel(channel *models.Channel, users []*models.User) (*ChannelResponse, error) {
+	var ids []string
+	for _, user := range users {
+		ids = append(ids, user.ID)
+	}
+	invite := &channelInvite{RoomId: channel.ID, UserIds: ids}
+	body, err := json.Marshal(invite)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(ChannelResponse)
+	err = c.Post("channels.invite", bytes.NewBuffer(body), response)
 	return response, err
 }
