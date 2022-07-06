@@ -29,9 +29,14 @@ type CreateChannel struct {
 	ReadOnly    bool     `json:"readOnly"`
 }
 
-type channelInvite struct {
+type inviteChannel struct {
 	RoomId  string   `json:"roomId"`
 	UserIds []string `json:"userIds"`
+}
+
+type joinChannel struct {
+	RoomId   string `json:"roomId"`
+	JoinCode string `json:"joinCode,omitempty"`
 }
 
 // GetPublicChannels returns all channels that can be seen by the logged in user.
@@ -109,7 +114,7 @@ func (c *Client) InviteChannel(channel *models.Channel, users []*models.User) (*
 	for _, user := range users {
 		ids = append(ids, user.ID)
 	}
-	invite := &channelInvite{RoomId: channel.ID, UserIds: ids}
+	invite := &inviteChannel{RoomId: channel.ID, UserIds: ids}
 	body, err := json.Marshal(invite)
 	if err != nil {
 		return nil, err
@@ -117,5 +122,22 @@ func (c *Client) InviteChannel(channel *models.Channel, users []*models.User) (*
 
 	response := new(ChannelResponse)
 	err = c.Post("channels.invite", bytes.NewBuffer(body), response)
+	return response, err
+}
+
+// JoinChannel joins yourself to the channel.
+// joinCode isn't needed if the user has the permission "join-without-join-code"
+// An empty string should be passed if not required
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/join
+func (c *Client) JoinChannel(channel *models.Channel, joinCode string) (*ChannelResponse, error) {
+	join := &joinChannel{RoomId: channel.ID}
+	body, err := json.Marshal(join)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(ChannelResponse)
+	err = c.Post("channels.join", bytes.NewBuffer(body), response)
 	return response, err
 }
