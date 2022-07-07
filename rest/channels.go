@@ -20,6 +20,12 @@ type ChannelResponse struct {
 	Channel models.Channel `json:"channel"`
 }
 
+type ChannelMembersResponse struct {
+	Status
+	models.Pagination
+	Members []*models.User `json:"members"`
+}
+
 // CreateChannel is payload for channels.create
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/create
@@ -95,7 +101,7 @@ func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error
 // The channel creator is always included.
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/create
-func (c *Client) CreateChannel(channel *CreateChannel) (*ChannelResponse, error) {
+func (c *Client) CreateChannel(channel *CreateChannel) (*models.Channel, error) {
 	body, err := json.Marshal(channel)
 	if err != nil {
 		return nil, err
@@ -103,13 +109,14 @@ func (c *Client) CreateChannel(channel *CreateChannel) (*ChannelResponse, error)
 
 	response := new(ChannelResponse)
 	err = c.Post("channels.create", bytes.NewBuffer(body), response)
-	return response, err
+
+	return &response.Channel, err
 }
 
 // InviteChannel adds users to the channel.
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/invite
-func (c *Client) InviteChannel(channel *models.Channel, users []*models.User) (*ChannelResponse, error) {
+func (c *Client) InviteChannel(channel *models.Channel, users []*models.User) (*models.Channel, error) {
 	var ids []string
 	for _, user := range users {
 		ids = append(ids, user.ID)
@@ -119,10 +126,10 @@ func (c *Client) InviteChannel(channel *models.Channel, users []*models.User) (*
 	if err != nil {
 		return nil, err
 	}
-
 	response := new(ChannelResponse)
 	err = c.Post("channels.invite", bytes.NewBuffer(body), response)
-	return response, err
+
+	return &response.Channel, err
 }
 
 // JoinChannel joins yourself to the channel.
@@ -130,14 +137,33 @@ func (c *Client) InviteChannel(channel *models.Channel, users []*models.User) (*
 // An empty string should be passed if not required
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/join
-func (c *Client) JoinChannel(channel *models.Channel, joinCode string) (*ChannelResponse, error) {
+func (c *Client) JoinChannel(channel *models.Channel, joinCode string) (*models.Channel, error) {
 	join := &joinChannel{RoomId: channel.ID}
 	body, err := json.Marshal(join)
 	if err != nil {
 		return nil, err
 	}
-
 	response := new(ChannelResponse)
 	err = c.Post("channels.join", bytes.NewBuffer(body), response)
-	return response, err
+
+	return &response.Channel, err
+}
+
+// GetChannelMembers lists all channel users.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/members
+func (c *Client) GetChannelMembers(channel *models.Channel) ([]*models.User, error) {
+	response := new(ChannelMembersResponse)
+	switch {
+	case channel.Name != "" && channel.ID == "":
+		if err := c.Get("channels.members", url.Values{"roomName": []string{channel.Name}}, response); err != nil {
+			return nil, err
+		}
+	default:
+		if err := c.Get("channels.members", url.Values{"roomId": []string{channel.ID}}, response); err != nil {
+			return nil, err
+		}
+	}
+
+	return response.Members, nil
 }

@@ -69,8 +69,26 @@ func TestRocket_InviteChannel(t *testing.T) {
 
 func TestRocket_JoinChannel(t *testing.T) {
 	rocket := getDefaultClient(t)
-
 	general := &models.Channel{ID: "GENERAL"}
 	_, err := rocket.JoinChannel(general, "")
 	assert.Nil(t, err)
+}
+
+func TestRocket_GetChannelMembers(t *testing.T) {
+	rocket := getDefaultClient(t)
+	t.Run("With channel name", func(t *testing.T) {
+		general := &models.Channel{Name: "general"}
+		members, err := rocket.GetChannelMembers(general)
+		assert.Nil(t, err)
+		// are new users added to general by default?
+		assert.GreaterOrEqual(t, len(members), 1)
+
+	})
+	t.Run("With channel ID", func(t *testing.T) {
+		general := &models.Channel{ID: "GENERAL"}
+		members, err := rocket.GetChannelMembers(general)
+		assert.Nil(t, err)
+		assert.GreaterOrEqual(t, len(members), 1)
+	})
+
 }
