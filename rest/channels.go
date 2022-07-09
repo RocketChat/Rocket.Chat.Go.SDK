@@ -29,7 +29,7 @@ type ChannelMembersResponse struct {
 // CreateChannel is payload for channels.create
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/create
-type CreateChannel struct {
+type createChannel struct {
 	ChannelName string   `json:"name"`
 	Members     []string `json:"members"`
 	ReadOnly    bool     `json:"readOnly"`
@@ -101,12 +101,16 @@ func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error
 // The channel creator is always included.
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/create
-func (c *Client) CreateChannel(channel *CreateChannel) (*models.Channel, error) {
-	body, err := json.Marshal(channel)
+func (c *Client) CreateChannel(channelName string, users []*models.User, readOnly bool) (*models.Channel, error) {
+	var usernames []string
+	for _, user := range users {
+		usernames = append(usernames, user.Name)
+	}
+	createChannel := &createChannel{ChannelName: channelName, Members: usernames, ReadOnly: readOnly}
+	body, err := json.Marshal(createChannel)
 	if err != nil {
 		return nil, err
 	}
-
 	response := new(ChannelResponse)
 	err = c.Post("channels.create", bytes.NewBuffer(body), response)
 

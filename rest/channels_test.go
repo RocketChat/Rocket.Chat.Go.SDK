@@ -50,8 +50,7 @@ func TestRocket_CreateChannel(t *testing.T) {
 	rocket := getDefaultClient(t)
 
 	// create channel with same name as testUserName so that channels aren't duplicated
-	channel := &CreateChannel{ChannelName: testUserName}
-	_, err := rocket.CreateChannel(channel)
+	_, err := rocket.CreateChannel(testUserName, nil, false)
 	assert.Nil(t, err)
 }
 
