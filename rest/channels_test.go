@@ -79,7 +79,6 @@ func TestRocket_GetChannelMembers(t *testing.T) {
 		general := &models.Channel{Name: "general"}
 		members, err := rocket.GetChannelMembers(general)
 		assert.Nil(t, err)
-		// are new users added to general by default?
 		assert.GreaterOrEqual(t, len(members), 1)
 
 	})
