@@ -59,6 +59,11 @@ type UserStatusResponse struct {
 	Success          bool   `json:"success"`
 }
 
+type meResponse struct {
+	models.Me
+	Status
+}
+
 func (s UserStatusResponse) OK() error {
 	if s.Success {
 		return nil
@@ -177,4 +182,13 @@ func (c *Client) GetUserStatus(username string) (*UserStatusResponse, error) {
 	response := new(UserStatusResponse)
 	err := c.Get("users.getStatus", params, response)
 	return response, err
+}
+
+// Me returns quick information about the authenticated user.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/other-important-endpoints/authentication-endpoints/me
+func (c *Client) Me() (*models.Me, error) {
+	response := new(meResponse)
+	err := c.Get("me", nil, response)
+	return &response.Me, err
 }
