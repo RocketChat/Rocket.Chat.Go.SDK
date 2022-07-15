@@ -75,7 +75,7 @@ func (s UserStatusResponse) OK() error {
 	return ResponseErr
 }
 
-type UserInfoResponse struct {
+type userInfoResponse struct {
 	User *models.User `json:"user"`
 	Status
 }
@@ -192,7 +192,7 @@ func (c *Client) UserInfo(username string) (*models.User, error) {
 	params := url.Values{
 		"username": []string{username},
 	}
-	response := new(UserInfoResponse)
+	response := new(userInfoResponse)
 	err := c.Get("users.info", params, response)
 	return response.User, err
 

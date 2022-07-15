@@ -20,7 +20,7 @@ type ChannelResponse struct {
 	Channel models.Channel `json:"channel"`
 }
 
-type ChannelMembersResponse struct {
+type channelMembersResponse struct {
 	Status
 	models.Pagination
 	Members []*models.User `json:"members"`
@@ -157,7 +157,7 @@ func (c *Client) JoinChannel(channel *models.Channel, joinCode string) (*models.
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/members
 func (c *Client) GetChannelMembers(channel *models.Channel) ([]*models.User, error) {
-	response := new(ChannelMembersResponse)
+	response := new(channelMembersResponse)
 	switch {
 	case channel.Name != "" && channel.ID == "":
 		if err := c.Get("channels.members", url.Values{"roomName": []string{channel.Name}}, response); err != nil {
