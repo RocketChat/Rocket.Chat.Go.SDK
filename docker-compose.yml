@@ -23,6 +23,7 @@ services:
       - OVERWRITE_SETTING_DDP_Rate_Limit_Connection_By_Method_Enabled=false
       - OVERWRITE_SETTING_DDP_Rate_User_By_Method_Enabled=false
       - CREATE_TOKENS_FOR_USERS=true
+      - TEST_MODE=true
 
     depends_on:
       - mongo
