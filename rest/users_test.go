@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/common_testing"
@@ -21,9 +20,23 @@ func TestRocket_LoginLogout(t *testing.T) {
 func TestRocket_Me(t *testing.T) {
 	rocket := getDefaultClient(t)
 	me, err := rocket.Me()
-	fmt.Println(me)
 	assert.Nil(t, err)
 	assert.NotNil(t, me)
 	assert.Equal(t, testUserEmail, me.Emails[0].Address)
 	assert.Equal(t, testUserName, me.UserName)
+}
+
+func TestRocket_GetAvatar(t *testing.T) {
+	rocket := getDefaultClient(t)
+	url, err := rocket.GetAvatar(testUserName)
+	assert.Nil(t, err)
+	assert.NotNil(t, url)
+}
+
+func TestRocket_GetUsers(t *testing.T) {
+	rocket := getDefaultClient(t)
+	users, err := rocket.GetUsers(nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, users)
+	assert.GreaterOrEqual(t, len(users), 1)
 }

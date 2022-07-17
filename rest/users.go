@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
@@ -62,6 +63,16 @@ type UserStatusResponse struct {
 type meResponse struct {
 	models.Me
 	Status
+}
+
+type avatarResponse struct {
+	Url string `json:"url"`
+	Status
+}
+
+type usersResponse struct {
+	Status
+	Users []models.User `json:"users"`
 }
 
 func (s UserStatusResponse) OK() error {
@@ -191,4 +202,36 @@ func (c *Client) Me() (*models.Me, error) {
 	response := new(meResponse)
 	err := c.Get("me", nil, response)
 	return &response.Me, err
+}
+
+// GetAvatar gets the URL for a user’s avatar.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-avatar
+func (c *Client) GetAvatar(username string) (*avatarResponse, error) {
+	params := url.Values{
+		"username": []string{username},
+	}
+	response := new(avatarResponse)
+	err := c.Get("users.getAvatar", params, response)
+	fmt.Println(response)
+	return response, err
+}
+
+// GetUsers gets all of the users in the system and their information.
+// The result is only limited to what the callee has access to view.
+// It supports the Offset, Count, and Sort Query Parameters.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-users-list
+func (c *Client) GetUsers(page *models.Pagination) ([]models.User, error) {
+	params := url.Values{}
+	if page != nil {
+		params.Add("count", strconv.Itoa(page.Count))
+		params.Add("offset", strconv.Itoa(page.Offset))
+		params.Add("total", strconv.Itoa(page.Total))
+	}
+	response := new(usersResponse)
+	if err := c.Get("users.list", params, response); err != nil {
+		return nil, err
+	}
+	return response.Users, nil
 }
