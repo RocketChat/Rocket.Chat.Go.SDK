@@ -75,6 +75,16 @@ type usersResponse struct {
 	Users []models.User `json:"users"`
 }
 
+type preferencesResponse struct {
+	Status
+	Preferenses models.Preferences `json:"preferences"`
+}
+
+type settingsResponse struct {
+	Status
+	Settings models.Settings `json:"settings"`
+}
+
 func (s UserStatusResponse) OK() error {
 	if s.Success {
 		return nil
@@ -207,14 +217,14 @@ func (c *Client) Me() (*models.Me, error) {
 // GetAvatar gets the URL for a user’s avatar.
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-avatar
-func (c *Client) GetAvatar(username string) (*avatarResponse, error) {
+func (c *Client) GetAvatar(username string) (string, error) {
 	params := url.Values{
 		"username": []string{username},
 	}
 	response := new(avatarResponse)
 	err := c.Get("users.getAvatar", params, response)
 	fmt.Println(response)
-	return response, err
+	return response.Url, err
 }
 
 // GetUsers gets all of the users in the system and their information.
@@ -234,4 +244,29 @@ func (c *Client) GetUsers(page *models.Pagination) ([]models.User, error) {
 		return nil, err
 	}
 	return response.Users, nil
+}
+
+// GetPreferences gets all preferences of the user.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-user-preferences
+func (c *Client) GetPreferences() (*models.Preferences, error) {
+	response := new(preferencesResponse)
+	err := c.Get("users.getPreferences", nil, response)
+	return &response.Preferenses, err
+}
+
+// SetPreferences sets preferences of the user.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/set-preferences
+func (c *Client) SetPreferences(preferences *models.Preferences) (*models.Preferences, error) {
+
+	body, err := json.Marshal(preferences)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(settingsResponse)
+	err = c.Post("users.saveUserPreferences", bytes.NewBuffer(body), response)
+	return &response.Settings.Preferences, err
+
 }

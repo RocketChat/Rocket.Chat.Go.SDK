@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/common_testing"
+	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,4 +40,19 @@ func TestRocket_GetUsers(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, users)
 	assert.GreaterOrEqual(t, len(users), 1)
+}
+
+func TestRocket_GetPreferences(t *testing.T) {
+	rocket := getDefaultClient(t)
+	pref, err := rocket.GetPreferences()
+	assert.Nil(t, err)
+	assert.NotNil(t, pref)
+}
+
+func TestRocket_SetPreferences(t *testing.T) {
+	rocket := getDefaultClient(t)
+	preferences := &models.Preferences{User: testUserName}
+	updatedPreferences, err := rocket.SetPreferences(preferences)
+	assert.Nil(t, err)
+	assert.NotNil(t, updatedPreferences)
 }

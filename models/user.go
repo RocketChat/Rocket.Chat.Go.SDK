@@ -30,6 +30,8 @@ type UpdateUserRequest struct {
 }
 
 type Preferences struct {
+	User                        string `json:"user,omitempty"`
+	Language                    string `json:"language,omitempty"`
 	EnableAutoAway              bool   `json:"enableAutoAway,omitempty"`
 	IdleTimeoutLimit            int    `json:"idleTimeoutLimit,omitempty"`
 	DesktopNotificationDuration int    `json:"desktopNotificationDuration,omitempty"`
@@ -61,6 +63,10 @@ type Preferences struct {
 	NotificationsSoundVolume    int    `json:"notificationsSoundVolume,omitempty"`
 }
 
+type Settings struct {
+	Preferences `json:"preferences"`
+}
+
 type Email struct {
 	Address  string `json:"address"`
 	Verified bool   `json:"verified"`
@@ -73,10 +79,8 @@ type Me struct {
 	UtcOffset        int      `json:"utcOffset"`
 	Active           bool     `json:"active"`
 	Roles            []string `json:"roles"`
-	Settings         struct {
-		Preferences `json:"preferences"`
-	} `json:"settings"`
-	CustomFields struct {
+	Settings         Settings `json:"settings"`
+	CustomFields     struct {
 		Twitter string `json:"twitter,omitempty"`
 	} `json:"customFields,omitempty"`
 	AvatarURL string `json:"avatarUrl"`
