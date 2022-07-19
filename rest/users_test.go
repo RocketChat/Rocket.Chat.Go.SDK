@@ -10,12 +10,9 @@ import (
 
 func TestRocket_LoginLogout(t *testing.T) {
 	client := getAuthenticatedClient(t, common_testing.GetRandomString(), common_testing.GetRandomEmail(), common_testing.GetRandomString())
+	assert.NotNil(t, client)
 	_, logoutErr := client.Logout()
 	assert.Nil(t, logoutErr)
-
-	// channels, err := client.GetJoinedChannels()
-	// assert.Nil(t, channels)
-	// assert.NotNil(t, err)
 }
 
 func TestRocket_UserInfo(t *testing.T) {
@@ -23,6 +20,7 @@ func TestRocket_UserInfo(t *testing.T) {
 	user, err := rocket.UserInfo(testUserName)
 	assert.Nil(t, err)
 	assert.NotNil(t, user)
+	assert.Equal(t, user.UserName, testUserName)
 }
 
 func TestRocket_Me(t *testing.T) {
@@ -51,9 +49,9 @@ func TestRocket_GetUsers(t *testing.T) {
 
 func TestRocket_GetPreferences(t *testing.T) {
 	rocket := getDefaultClient(t)
-	pref, err := rocket.GetPreferences()
+	preferences, err := rocket.GetPreferences()
 	assert.Nil(t, err)
-	assert.NotNil(t, pref)
+	assert.NotNil(t, preferences)
 }
 
 func TestRocket_SetPreferences(t *testing.T) {

@@ -51,7 +51,7 @@ type CreateUserResponse struct {
 	} `json:"user"`
 }
 
-type UserInfoResponse struct {
+type userInfoResponse struct {
 	User *models.User `json:"user"`
 	Status
 }
@@ -205,10 +205,22 @@ func (c *Client) UserInfo(username string) (*models.User, error) {
 	params := url.Values{
 		"username": []string{username},
 	}
-	response := new(UserInfoResponse)
+	response := new(userInfoResponse)
 	err := c.Get("users.info", params, response)
 	return response.User, err
 
+}
+
+// GetAvatar gets the URL for a user’s avatar.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-avatar
+func (c *Client) GetAvatar(username string) (string, error) {
+	params := url.Values{
+		"username": []string{username},
+	}
+	response := new(avatarResponse)
+	err := c.Get("users.getAvatar", params, response)
+	return response.Url, err
 }
 
 // SetUserAvatar updates a user's avatar being logged in with a user that has permission to do so.
@@ -239,19 +251,6 @@ func (c *Client) Me() (*models.Me, error) {
 	response := new(meResponse)
 	err := c.Get("me", nil, response)
 	return &response.Me, err
-}
-
-// GetAvatar gets the URL for a user’s avatar.
-//
-// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-avatar
-func (c *Client) GetAvatar(username string) (string, error) {
-	params := url.Values{
-		"username": []string{username},
-	}
-	response := new(avatarResponse)
-	err := c.Get("users.getAvatar", params, response)
-	fmt.Println(response)
-	return response.Url, err
 }
 
 // GetUsers gets all of the users in the system and their information.
