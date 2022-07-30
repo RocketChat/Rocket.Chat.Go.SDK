@@ -10,17 +10,17 @@ import (
 func TestRocket_GetPublicChannels(t *testing.T) {
 	rocket := getDefaultClient(t)
 
-	resp, err := rocket.GetPublicChannels()
+	channels, err := rocket.GetPublicChannels()
 	assert.Nil(t, err)
-	assert.NotZero(t, len(resp.Channels))
+	assert.NotZero(t, len(channels))
 }
 
 func TestRocket_GetJoinedChannels(t *testing.T) {
 	rocket := getDefaultClient(t)
 
-	resp, err := rocket.GetJoinedChannels(nil)
+	channels, err := rocket.GetJoinedChannels(nil)
 	assert.Nil(t, err)
-	assert.NotZero(t, len(resp.Channels))
+	assert.NotZero(t, len(channels))
 }
 
 func TestRocket_LeaveChannel(t *testing.T) {

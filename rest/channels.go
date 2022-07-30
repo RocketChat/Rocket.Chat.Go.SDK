@@ -33,37 +33,37 @@ type GroupResponse struct {
 // GetPublicChannels returns all channels that can be seen by the logged in user.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list
-func (c *Client) GetPublicChannels() (*ChannelsResponse, error) {
+func (c *Client) GetPublicChannels() ([]models.Channel, error) {
 	response := new(ChannelsResponse)
 	if err := c.Get("channels.list", nil, response); err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return response.Channels, nil
 }
 
 // GetPrivateGroups returns all channels that can be seen by the logged in user.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/groups/list
-func (c *Client) GetPrivateGroups() (*GroupsResponse, error) {
+func (c *Client) GetPrivateGroups() ([]models.Channel, error) {
 	response := new(GroupsResponse)
 	if err := c.Get("groups.list", nil, response); err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return response.Groups, nil
 }
 
 // GetJoinedChannels returns all channels that the user has joined.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list-joined
-func (c *Client) GetJoinedChannels(params url.Values) (*ChannelsResponse, error) {
+func (c *Client) GetJoinedChannels(params url.Values) ([]models.Channel, error) {
 	response := new(ChannelsResponse)
 	if err := c.Get("channels.list.joined", params, response); err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return response.Channels, nil
 }
 
 // LeaveChannel leaves a channel. The id of the channel has to be not nil.
