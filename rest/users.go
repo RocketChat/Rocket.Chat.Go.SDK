@@ -25,7 +25,16 @@ type logonResponse struct {
 	} `json:"data"`
 }
 
-type CreateUserResponse struct {
+type createUserRequest struct {
+	Name         string            `json:"name"`
+	Email        string            `json:"email"`
+	Password     string            `json:"password"`
+	Username     string            `json:"username"`
+	Roles        []string          `json:"roles,omitempty"`
+	CustomFields map[string]string `json:"customFields,omitempty"`
+}
+
+type createUserResponse struct {
 	Status
 	User struct {
 		ID        string    `json:"_id"`
@@ -50,14 +59,25 @@ type CreateUserResponse struct {
 	} `json:"user"`
 }
 
-type UserStatusResponse struct {
+type updateUserRequest struct {
+	UserID string `json:"userId"`
+	Data   struct {
+		Name         string            `json:"name"`
+		Email        string            `json:"email"`
+		Password     string            `json:"password"`
+		Username     string            `json:"username"`
+		CustomFields map[string]string `json:"customFields,omitempty"`
+	} `json:"data"`
+}
+
+type userStatusResponse struct {
 	models.UserStatus
 	ID      string `json:"_id"`
 	Error   string `json:"error"`
 	Success bool   `json:"success"`
 }
 
-func (s UserStatusResponse) OK() error {
+func (s userStatusResponse) OK() error {
 	if s.Success {
 		return nil
 	}
@@ -131,13 +151,13 @@ func (c *Client) Logout() (string, error) {
 // CreateUser being logged in with a user that has permission to do so.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/create
-func (c *Client) CreateUser(req *models.CreateUserRequest) (*models.User, error) {
+func (c *Client) CreateUser(req *createUserRequest) (*models.User, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := new(CreateUserResponse)
+	resp := new(createUserResponse)
 	if err := c.Post("users.create", bytes.NewBuffer(body), resp); err != nil {
 		return nil, err
 	}
@@ -155,13 +175,13 @@ func (c *Client) CreateUser(req *models.CreateUserRequest) (*models.User, error)
 // UpdateUser updates a user's data being logged in with a user that has permission to do so.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/update/
-func (c *Client) UpdateUser(req *models.UpdateUserRequest) (*models.User, error) {
+func (c *Client) UpdateUser(req *updateUserRequest) (*models.User, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := new(CreateUserResponse)
+	resp := new(createUserResponse)
 	err = c.Post("users.update", bytes.NewBuffer(body), resp)
 	if err != nil {
 		return nil, err
@@ -192,7 +212,7 @@ func (c *Client) GetUserStatus(username string) (*models.UserStatus, error) {
 		"username": []string{username},
 	}
 
-	response := new(UserStatusResponse)
+	response := new(userStatusResponse)
 	if err := c.Get("users.getStatus", params, response); err != nil {
 		return nil, err
 	}
