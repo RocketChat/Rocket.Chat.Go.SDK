@@ -28,3 +28,9 @@ type UpdateUserRequest struct {
 		CustomFields map[string]string `json:"customFields,omitempty"`
 	} `json:"data"`
 }
+
+type UserStatus struct {
+	Message          string `json:"message"`
+	Status           string `json:"status"`
+	ConnectionStatus string `json:"connectionStatus"`
+}

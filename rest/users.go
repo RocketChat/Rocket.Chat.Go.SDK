@@ -51,12 +51,10 @@ type CreateUserResponse struct {
 }
 
 type UserStatusResponse struct {
-	ID               string `json:"_id"`
-	ConnectionStatus string `json:"connectionStatus"`
-	Message          string `json:"message"`
-	Status           string `json:"status"`
-	Error            string `json:"error"`
-	Success          bool   `json:"success"`
+	models.UserStatus
+	ID      string `json:"_id"`
+	Error   string `json:"error"`
+	Success bool   `json:"success"`
 }
 
 func (s UserStatusResponse) OK() error {
@@ -133,48 +131,77 @@ func (c *Client) Logout() (string, error) {
 // CreateUser being logged in with a user that has permission to do so.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/create
-func (c *Client) CreateUser(req *models.CreateUserRequest) (*CreateUserResponse, error) {
+func (c *Client) CreateUser(req *models.CreateUserRequest) (*models.User, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	response := new(CreateUserResponse)
-	err = c.Post("users.create", bytes.NewBuffer(body), response)
-	return response, err
+	resp := new(CreateUserResponse)
+	if err := c.Post("users.create", bytes.NewBuffer(body), resp); err != nil {
+		return nil, err
+	}
+
+	createdUser := &models.User{
+		ID:       resp.User.ID,
+		Name:     resp.User.Name,
+		UserName: resp.User.Username,
+		Status:   resp.User.Status,
+	}
+
+	return createdUser, nil
 }
 
 // UpdateUser updates a user's data being logged in with a user that has permission to do so.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/update/
-func (c *Client) UpdateUser(req *models.UpdateUserRequest) (*CreateUserResponse, error) {
+func (c *Client) UpdateUser(req *models.UpdateUserRequest) (*models.User, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	response := new(CreateUserResponse)
-	err = c.Post("users.update", bytes.NewBuffer(body), response)
-	return response, err
+	resp := new(CreateUserResponse)
+	err = c.Post("users.update", bytes.NewBuffer(body), resp)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedUser := &models.User{
+		ID:       resp.User.ID,
+		Name:     resp.User.Name,
+		UserName: resp.User.Username,
+		Status:   resp.User.Status,
+	}
+
+	return updatedUser, nil
 }
 
 // SetUserAvatar updates a user's avatar being logged in with a user that has permission to do so.
 // Currently only passing an URL is possible.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/setavatar/
-func (c *Client) SetUserAvatar(userID, username, avatarURL string) (*Status, error) {
+func (c *Client) SetUserAvatar(userID, username, avatarURL string) error {
 	body := fmt.Sprintf(`{ "userId": "%s","username": "%s","avatarUrl":"%s"}`, userID, username, avatarURL)
 	response := new(Status)
-	err := c.Post("users.setAvatar", bytes.NewBufferString(body), response)
-	return response, err
+	return c.Post("users.setAvatar", bytes.NewBufferString(body), response)
 }
 
-func (c *Client) GetUserStatus(username string) (*UserStatusResponse, error) {
+func (c *Client) GetUserStatus(username string) (*models.UserStatus, error) {
 	params := url.Values{
 		"username": []string{username},
 	}
 
 	response := new(UserStatusResponse)
-	err := c.Get("users.getStatus", params, response)
-	return response, err
+	if err := c.Get("users.getStatus", params, response); err != nil {
+		return nil, err
+	}
+
+	userStatus := &models.UserStatus{
+		Message:          response.Message,
+		Status:           response.Status,
+		ConnectionStatus: response.ConnectionStatus,
+	}
+
+	return userStatus, nil
 }
