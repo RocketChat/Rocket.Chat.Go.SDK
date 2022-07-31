@@ -25,7 +25,7 @@ type logonResponse struct {
 	} `json:"data"`
 }
 
-type createUserRequest struct {
+type CreateUserRequest struct {
 	Name         string            `json:"name"`
 	Email        string            `json:"email"`
 	Password     string            `json:"password"`
@@ -59,7 +59,7 @@ type createUserResponse struct {
 	} `json:"user"`
 }
 
-type updateUserRequest struct {
+type UpdateUserRequest struct {
 	UserID string `json:"userId"`
 	Data   struct {
 		Name         string            `json:"name"`
@@ -151,7 +151,7 @@ func (c *Client) Logout() (string, error) {
 // CreateUser being logged in with a user that has permission to do so.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/create
-func (c *Client) CreateUser(req *createUserRequest) (*models.User, error) {
+func (c *Client) CreateUser(req *CreateUserRequest) (*models.User, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -175,7 +175,7 @@ func (c *Client) CreateUser(req *createUserRequest) (*models.User, error) {
 // UpdateUser updates a user's data being logged in with a user that has permission to do so.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/users/update/
-func (c *Client) UpdateUser(req *updateUserRequest) (*models.User, error) {
+func (c *Client) UpdateUser(req *UpdateUserRequest) (*models.User, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
