@@ -26,11 +26,11 @@ func TestRocket_GetMessage(t *testing.T) {
 		Channel: "general",
 		Text:    text,
 	}
-	postResp, err := rocket.PostMessage(postMessage)
+	message, err := rocket.PostMessage(postMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, postResp)
+	assert.NotNil(t, message)
 
-	msgId := postResp.Message.ID
+	msgId := message.ID
 	msg, err := rocket.GetMessage(msgId)
 	assert.Nil(t, err)
 	assert.Equal(t, text, msg.Msg)
@@ -85,20 +85,20 @@ func TestRocket_UpdateMessage(t *testing.T) {
 		Channel: "general",
 		Text:    textOriginal,
 	}
-	postResp, err := rocket.PostMessage(postMessage)
+	message, err := rocket.PostMessage(postMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, postResp)
+	assert.NotNil(t, message)
 
-	roomId := postResp.Message.RoomID
-	msgId := postResp.Message.ID
+	roomId := message.RoomID
+	msgId := message.ID
 	updateMessage := &models.UpdateMessage{
 		RoomID: roomId,
 		MsgID:  msgId,
 		Text:   textUpdated,
 	}
-	resp, err := rocket.UpdateMessage(updateMessage)
+	returnMessage, err := rocket.UpdateMessage(updateMessage)
 	assert.Nil(t, err)
-	assert.Equal(t, textUpdated, resp.Message.Msg)
+	assert.Equal(t, textUpdated, returnMessage.Msg)
 }
 
 func TestRocket_DeleteMessage(t *testing.T) {
@@ -109,20 +109,20 @@ func TestRocket_DeleteMessage(t *testing.T) {
 			Channel: "general",
 			Text:    text,
 		}
-		postResp, err := rocket.PostMessage(postMessage)
+		message, err := rocket.PostMessage(postMessage)
 		assert.Nil(t, err)
-		assert.NotNil(t, postResp)
+		assert.NotNil(t, message)
 
-		roomId := postResp.Message.RoomID
-		msgId := postResp.Message.ID
+		roomId := message.RoomID
+		msgId := message.ID
 		deleteMessage := &models.DeleteMessage{
 			RoomID: roomId,
 			MsgID:  msgId,
 			AsUser: true,
 		}
-		resp, err := rocket.DeleteMessage(deleteMessage)
+		returnMessage, err := rocket.DeleteMessage(deleteMessage)
 		assert.Nil(t, err)
-		assert.NotNil(t, resp)
+		assert.NotNil(t, returnMessage)
 	})
 	t.Run("asUser = false", func(t *testing.T) {
 		text := "TestRocket_DeleteMessageNotAsUser"
@@ -130,20 +130,20 @@ func TestRocket_DeleteMessage(t *testing.T) {
 			Channel: "general",
 			Text:    text,
 		}
-		postResp, err := rocket.PostMessage(postMessage)
+		message, err := rocket.PostMessage(postMessage)
 		assert.Nil(t, err)
-		assert.NotNil(t, postResp)
+		assert.NotNil(t, message)
 
-		roomId := postResp.Message.RoomID
-		msgId := postResp.Message.ID
+		roomId := message.RoomID
+		msgId := message.ID
 		deleteMessage := &models.DeleteMessage{
 			RoomID: roomId,
 			MsgID:  msgId,
 			AsUser: false,
 		}
-		resp, err := rocket.DeleteMessage(deleteMessage)
+		returnMessage, err := rocket.DeleteMessage(deleteMessage)
 		assert.Nil(t, err)
-		assert.NotNil(t, resp)
+		assert.NotNil(t, returnMessage)
 	})
 }
 

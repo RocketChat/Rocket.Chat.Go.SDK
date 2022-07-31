@@ -39,7 +39,7 @@ func (c *Client) Send(channel *models.Channel, msg string) error {
 // The message will be json encode.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
-func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) {
+func (c *Client) PostMessage(msg *models.PostMessage) (*models.Message, error) {
 	body, err := json.Marshal(msg)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (c *Client) PostMessage(msg *models.PostMessage) (*MessageResponse, error) 
 
 	response := new(MessageResponse)
 	err = c.Post("chat.postMessage", bytes.NewBuffer(body), response)
-	return response, err
+	return &response.Message, err
 }
 
 // GetMessage retrieves a single chat message by the provided id.
@@ -113,7 +113,7 @@ func (c *Client) GetMentionedMessages(channel *models.Channel, page *models.Pagi
 // UpdateMessage updates a specific message.
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/message-update
-func (c *Client) UpdateMessage(msg *models.UpdateMessage) (*MessageResponse, error) {
+func (c *Client) UpdateMessage(msg *models.UpdateMessage) (*models.Message, error) {
 	body, err := json.Marshal(msg)
 	if err != nil {
 		return nil, err
@@ -121,14 +121,14 @@ func (c *Client) UpdateMessage(msg *models.UpdateMessage) (*MessageResponse, err
 
 	response := new(MessageResponse)
 	err = c.Post("chat.update", bytes.NewBuffer(body), response)
-	return response, err
+	return &response.Message, err
 
 }
 
 // DeleteMessage deletes a specific message.
 //
 // https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/delete
-func (c *Client) DeleteMessage(msg *models.DeleteMessage) (*DeleteMessageResponse, error) {
+func (c *Client) DeleteMessage(msg *models.DeleteMessage) (*models.Message, error) {
 	body, err := json.Marshal(msg)
 	if err != nil {
 		return nil, err
@@ -136,7 +136,7 @@ func (c *Client) DeleteMessage(msg *models.DeleteMessage) (*DeleteMessageRespons
 
 	response := new(DeleteMessageResponse)
 	err = c.Post("chat.delete", bytes.NewBuffer(body), response)
-	return response, err
+	return &response.Message, err
 }
 
 // SearchMessages searches for messages in a channel by id and text message
