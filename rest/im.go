@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-type DirectMessageResponse struct {
+type directMessageResponse struct {
 	Status
 	Room Room `json:"room"`
 }
@@ -14,7 +14,7 @@ type DirectMessageResponse struct {
 type Room struct {
 	ID        string   `json:"_id"`
 	Rid       string   `json:"rid"`
-	Type         string   `json:"t"`
+	Type      string   `json:"t"`
 	Usernames []string `json:"usernames"`
 }
 
@@ -23,7 +23,7 @@ type Room struct {
 // https://developer.rocket.chat/api/rest-api/methods/im/create
 func (c *Client) CreateDirectMessage(username string) (*Room, error) {
 	body := fmt.Sprintf(`{ "username": "%s" }`, username)
-	resp := new(DirectMessageResponse)
+	resp := new(directMessageResponse)
 
 	if err := c.Post("im.create", bytes.NewBufferString(body), resp); err != nil {
 		return nil, err
