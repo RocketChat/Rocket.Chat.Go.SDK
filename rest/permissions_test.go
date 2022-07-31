@@ -11,12 +11,11 @@ import (
 func TestRocket_SetPermissions(t *testing.T) {
 	rocket := getDefaultClient(t)
 
-	request := UpdatePermissionsRequest{
-		Permissions: []models.Permission{{ID: "add-user-to-any-p-room", Roles: []string{"admin"}}},
-	}
-	permissions, err := rocket.UpdatePermissions(&request)
+	permissions := []models.Permission{{ID: "add-user-to-any-p-room", Roles: []string{"admin"}}}
+
+	returnPermissions, err := rocket.UpdatePermissions(permissions)
 
 	assert.Nil(t, err)
-	assert.NotNil(t, permissions)
-	assert.NotEmpty(t, permissions)
+	assert.NotNil(t, returnPermissions)
+	assert.NotEmpty(t, returnPermissions)
 }
