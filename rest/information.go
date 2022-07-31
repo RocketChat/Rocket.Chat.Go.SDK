@@ -6,7 +6,7 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
-type InfoResponse struct {
+type infoResponse struct {
 	Status
 	Info models.Info `json:"info"`
 }
@@ -16,7 +16,7 @@ type InfoResponse struct {
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/info
 func (c *Client) GetServerInfo() (*models.Info, error) {
-	response := new(InfoResponse)
+	response := new(infoResponse)
 	if err := c.Get("info", nil, response); err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func (c *Client) GetServerInfo() (*models.Info, error) {
 	return &response.Info, nil
 }
 
-type DirectoryResponse struct {
+type directoryResponse struct {
 	Status
 	models.Directory
 }
@@ -34,7 +34,7 @@ type DirectoryResponse struct {
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/directory
 func (c *Client) GetDirectory(params url.Values) (*models.Directory, error) {
-	response := new(DirectoryResponse)
+	response := new(directoryResponse)
 	if err := c.Get("directory", params, response); err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *Client) GetDirectory(params url.Values) (*models.Directory, error) {
 	return &response.Directory, nil
 }
 
-type SpotlightResponse struct {
+type spotlightResponse struct {
 	Status
 	models.Spotlight
 }
@@ -52,7 +52,7 @@ type SpotlightResponse struct {
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/spotlight
 func (c *Client) GetSpotlight(params url.Values) (*models.Spotlight, error) {
-	response := new(SpotlightResponse)
+	response := new(spotlightResponse)
 	if err := c.Get("spotlight", params, response); err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (c *Client) GetSpotlight(params url.Values) (*models.Spotlight, error) {
 	return &response.Spotlight, nil
 }
 
-type StatisticsResponse struct {
+type statisticsResponse struct {
 	Status
 	models.StatisticsInfo
 }
@@ -70,7 +70,7 @@ type StatisticsResponse struct {
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/statistics
 func (c *Client) GetStatistics() (*models.StatisticsInfo, error) {
-	response := new(StatisticsResponse)
+	response := new(statisticsResponse)
 	if err := c.Get("statistics", nil, response); err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *Client) GetStatistics() (*models.StatisticsInfo, error) {
 	return &response.StatisticsInfo, nil
 }
 
-type StatisticsListResponse struct {
+type statisticsListResponse struct {
 	Status
 	models.StatisticsList
 }
@@ -89,7 +89,7 @@ type StatisticsListResponse struct {
 //
 // https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/statistics.list
 func (c *Client) GetStatisticsList(params url.Values) (*models.StatisticsList, error) {
-	response := new(StatisticsListResponse)
+	response := new(statisticsListResponse)
 	if err := c.Get("statistics.list", params, response); err != nil {
 		return nil, err
 	}

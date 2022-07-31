@@ -37,3 +37,10 @@ type ChannelSubscription struct {
 	Roles       []string `json:"roles"`
 	Unread      float64  `json:"unread"`
 }
+
+type Room struct {
+	ID        string   `json:"_id"`
+	Rid       string   `json:"rid"`
+	Type      string   `json:"t"`
+	Usernames []string `json:"usernames"`
+}

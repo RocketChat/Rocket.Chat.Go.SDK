@@ -8,24 +8,24 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
-type ChannelsResponse struct {
+type channelsResponse struct {
 	Status
 	models.Pagination
 	Channels []models.Channel `json:"channels"`
 }
 
-type ChannelResponse struct {
+type channelResponse struct {
 	Status
 	Channel models.Channel `json:"channel"`
 }
 
-type GroupsResponse struct {
+type groupsResponse struct {
 	Status
 	models.Pagination
 	Groups []models.Channel `json:"groups"`
 }
 
-type GroupResponse struct {
+type groupResponse struct {
 	Status
 	Group models.Channel `json:"group"`
 }
@@ -33,37 +33,37 @@ type GroupResponse struct {
 // GetPublicChannels returns all channels that can be seen by the logged in user.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list
-func (c *Client) GetPublicChannels() (*ChannelsResponse, error) {
-	response := new(ChannelsResponse)
+func (c *Client) GetPublicChannels() ([]models.Channel, error) {
+	response := new(channelsResponse)
 	if err := c.Get("channels.list", nil, response); err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return response.Channels, nil
 }
 
 // GetPrivateGroups returns all channels that can be seen by the logged in user.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/groups/list
-func (c *Client) GetPrivateGroups() (*GroupsResponse, error) {
-	response := new(GroupsResponse)
+func (c *Client) GetPrivateGroups() ([]models.Channel, error) {
+	response := new(groupsResponse)
 	if err := c.Get("groups.list", nil, response); err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return response.Groups, nil
 }
 
 // GetJoinedChannels returns all channels that the user has joined.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/list-joined
-func (c *Client) GetJoinedChannels(params url.Values) (*ChannelsResponse, error) {
-	response := new(ChannelsResponse)
+func (c *Client) GetJoinedChannels(params url.Values) ([]models.Channel, error) {
+	response := new(channelsResponse)
 	if err := c.Get("channels.list.joined", params, response); err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return response.Channels, nil
 }
 
 // LeaveChannel leaves a channel. The id of the channel has to be not nil.
@@ -71,14 +71,14 @@ func (c *Client) GetJoinedChannels(params url.Values) (*ChannelsResponse, error)
 // https://rocket.chat/docs/developer-guides/rest-api/channels/leave
 func (c *Client) LeaveChannel(channel *models.Channel) error {
 	var body = fmt.Sprintf(`{ "roomId": "%s"}`, channel.ID)
-	return c.Post("channels.leave", bytes.NewBufferString(body), new(ChannelResponse))
+	return c.Post("channels.leave", bytes.NewBufferString(body), new(channelResponse))
 }
 
 // GetChannelInfo get information about a channel. That might be useful to update the usernames.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/channels/info
 func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error) {
-	response := new(ChannelResponse)
+	response := new(channelResponse)
 	switch {
 	case channel.Name != "" && channel.ID == "":
 		if err := c.Get("channels.info", url.Values{"roomName": []string{channel.Name}}, response); err != nil {
@@ -97,7 +97,7 @@ func (c *Client) GetChannelInfo(channel *models.Channel) (*models.Channel, error
 //
 // https://rocket.chat/docs/developer-guides/rest-api/groups/info
 func (c *Client) GetGroupInfo(channel *models.Channel) (*models.Channel, error) {
-	response := new(GroupResponse)
+	response := new(groupResponse)
 	switch {
 	case channel.Name != "" && channel.ID == "":
 		if err := c.Get("groups.info", url.Values{"roomName": []string{channel.Name}}, response); err != nil {
