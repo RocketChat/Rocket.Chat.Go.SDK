@@ -11,17 +11,17 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
 )
 
-type MessagesResponse struct {
+type messagesResponse struct {
 	Status
 	Messages []models.Message `json:"messages"`
 }
 
-type MessageResponse struct {
+type messageResponse struct {
 	Status
 	Message models.Message `json:"message"`
 }
 
-type DeleteMessageResponse struct {
+type deleteMessageResponse struct {
 	Status
 	Message models.Message
 }
@@ -32,7 +32,7 @@ type DeleteMessageResponse struct {
 // https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
 func (c *Client) Send(channel *models.Channel, msg string) error {
 	body := fmt.Sprintf(`{ "channel": "%s", "text": "%s"}`, channel.Name, html.EscapeString(msg))
-	return c.Post("chat.postMessage", bytes.NewBufferString(body), new(MessageResponse))
+	return c.Post("chat.postMessage", bytes.NewBufferString(body), new(messageResponse))
 }
 
 // PostMessage send a message to a channel. The channel or roomId has to be not nil.
@@ -45,7 +45,7 @@ func (c *Client) PostMessage(msg *models.PostMessage) (*models.Message, error) {
 		return nil, err
 	}
 
-	response := new(MessageResponse)
+	response := new(messageResponse)
 	err = c.Post("chat.postMessage", bytes.NewBuffer(body), response)
 	return &response.Message, err
 }
@@ -59,7 +59,7 @@ func (c *Client) GetMessage(msgId string) (models.Message, error) {
 	params := url.Values{
 		"msgId": []string{msgId},
 	}
-	response := new(MessageResponse)
+	response := new(messageResponse)
 	if err := c.Get("chat.getMessage", params, response); err != nil {
 		return models.Message{}, err
 	}
@@ -80,7 +80,7 @@ func (c *Client) GetMessages(channel *models.Channel, page *models.Pagination) (
 		params.Add("offset", strconv.Itoa(page.Offset))
 	}
 
-	response := new(MessagesResponse)
+	response := new(messagesResponse)
 	if err := c.Get("channels.history", params, response); err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (c *Client) GetMentionedMessages(channel *models.Channel, page *models.Pagi
 		params.Add("offset", strconv.Itoa(page.Offset))
 	}
 
-	response := new(MessagesResponse)
+	response := new(messagesResponse)
 	if err := c.Get("chat.getMentionedMessages", params, response); err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (c *Client) UpdateMessage(msg *models.UpdateMessage) (*models.Message, erro
 		return nil, err
 	}
 
-	response := new(MessageResponse)
+	response := new(messageResponse)
 	err = c.Post("chat.update", bytes.NewBuffer(body), response)
 	return &response.Message, err
 
@@ -134,7 +134,7 @@ func (c *Client) DeleteMessage(msg *models.DeleteMessage) (*models.Message, erro
 		return nil, err
 	}
 
-	response := new(DeleteMessageResponse)
+	response := new(deleteMessageResponse)
 	err = c.Post("chat.delete", bytes.NewBuffer(body), response)
 	return &response.Message, err
 }
@@ -148,7 +148,7 @@ func (c *Client) SearchMessages(channel *models.Channel, searchText string) ([]m
 		"roomId":     []string{channel.ID},
 		"searchText": []string{searchText},
 	}
-	response := new(MessagesResponse)
+	response := new(messagesResponse)
 	if err := c.Get("chat.search", params, response); err != nil {
 		return nil, err
 	}
