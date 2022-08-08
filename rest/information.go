@@ -11,6 +11,12 @@ type InfoResponse struct {
 	Info models.Info `json:"info"`
 }
 
+type SlashCommandsResponse struct {
+	Status
+	Success  bool                  `json:"success"`
+	Commands []models.SlashCommand `json:"commands"`
+}
+
 // GetServerInfo a simple method, requires no authentication,
 // that returns information about the server including version information.
 //
@@ -95,4 +101,17 @@ func (c *Client) GetStatisticsList(params url.Values) (*models.StatisticsList, e
 	}
 
 	return &response.StatisticsList, nil
+}
+
+// GetSlashCommandsList
+// Slash Commands available in the Rocket.Chat server.
+// It supports the offset, count and Sort Query Parameters along with just the Fields and Query Parameters.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/commands-endpoints/list
+func (c *Client) GetSlashCommandsList(params url.Values) ([]models.SlashCommand, error) {
+	response := new(SlashCommandsResponse)
+	if err := c.Get("commands.list", params, response); err != nil {
+		return nil, err
+	}
+	return response.Commands, nil
 }

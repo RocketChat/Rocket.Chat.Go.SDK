@@ -55,3 +55,12 @@ func TestRocket_GetStatisticsList(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, statistics)
 }
+
+func TestRocket_GetSlashCommandsList(t *testing.T) {
+	rocket := Client{Protocol: common_testing.Protocol, Host: common_testing.Host, Port: common_testing.Port}
+	// TODO admin user
+	rocket.auth = &authInfo{id: "4SicoW2wDjcAaRh4M", token: "4nI24JkcHTsqTtOUeJYbbrhum5T_Y6IdjAwyj72qDBu"}
+	slashCommands, err := rocket.GetSlashCommandsList(url.Values{"offset": []string{"0"}, "count": []string{"50"}})
+	assert.Nil(t, err)
+	assert.NotNil(t, slashCommands)
+}
