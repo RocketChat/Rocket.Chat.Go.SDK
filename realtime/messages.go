@@ -253,6 +253,7 @@ func getMessageFromDocument(arg *gabs.Container) *models.Message {
 		User: &models.User{
 			ID:       stringOrZero(arg.Path("u._id").Data()),
 			UserName: stringOrZero(arg.Path("u.username").Data()),
+			Name: stringOrZero(arg.Path("u.name").Data()),
 		},
 	}
 }
