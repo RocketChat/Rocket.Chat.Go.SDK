@@ -52,8 +52,9 @@ func (c *Client) DMHistory(channel *models.Channel, inclusive bool, fromDate tim
 		params.Add("count", strconv.Itoa(page.Count))
 	}
 
+	latestTime := fromDate.Format(time.RFC3339)
+	params.Add("latest", latestTime)
 	params.Add("inclusive", "true")
-	params.Add("oldest", fromDate.String())
 
 	response := new(MessagesResponse)
 	if err := c.Get("dm.history", params, response); err != nil {

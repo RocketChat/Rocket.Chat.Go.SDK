@@ -21,8 +21,9 @@ func (c *Client) GroupHistory(channel *models.Channel, inclusive bool, fromDate 
 		params.Add("count", strconv.Itoa(page.Count))
 	}
 
+	latestTime := fromDate.Format(time.RFC3339)
+	params.Add("latest", latestTime)
 	params.Add("inclusive", "true")
-	params.Add("oldest", fromDate.String())
 
 	response := new(MessagesResponse)
 	if err := c.Get("groups.history", params, response); err != nil {
