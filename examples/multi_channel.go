@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 
@@ -8,9 +9,8 @@ import (
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/rest"
 )
 
-// Create a rocket chat client, login, and send a message to general channel
+// Create a rocket chat client, login, and send a message to all public channels.
 func main() {
-
 	serverURL := url.URL{
 		Scheme: "http",
 		Host:   "localhost:3000",
@@ -27,12 +27,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	message := models.PostMessage{
-		Channel: "general",
-		Text:    "Hello World!",
-	}
-
-	if _, err := rc_client.PostMessage(&message); err != nil {
+	channelResp, err := rc_client.GetPublicChannels()
+	if err != nil {
 		log.Fatal(err)
+	}
+	channels := channelResp.Channels
+
+	for _, channel := range channels {
+		greeting := fmt.Sprintf("Hello %s", channel.Name)
+		message := models.PostMessage{
+			Channel: channel.Name,
+			Text:    greeting,
+		}
+		if _, err := rc_client.PostMessage(&message); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
