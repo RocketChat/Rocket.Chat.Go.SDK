@@ -42,5 +42,6 @@ func main() {
 		if _, err := rc_client.PostMessage(&message); err != nil {
 			log.Fatal(err)
 		}
+		fmt.Printf("Sent message to %s\n", channel.Name)
 	}
 }

@@ -10,7 +10,6 @@ import (
 
 // Create a rocket chat client, login, and send a message to general channel
 func main() {
-
 	serverURL := url.URL{
 		Scheme: "http",
 		Host:   "localhost:3000",
