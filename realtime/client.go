@@ -1,4 +1,4 @@
-//Package realtime provides access to Rocket.Chat's realtime API via ddp
+// Package realtime provides access to Rocket.Chat's realtime API via ddp
 package realtime
 
 import (
@@ -17,7 +17,7 @@ type Client struct {
 	sf  *sonyflake.Sonyflake
 }
 
-//NewClient creates a new instance and connects to the websocket.
+// NewClient creates a new instance and connects to the websocket.
 func NewClient(serverURL *url.URL, debug bool) (*Client, error) {
 	sf := sonyflake.NewSonyflake(sonyflake.Settings{})
 	if sf == nil {
@@ -61,6 +61,10 @@ type statusListener struct {
 
 func (s statusListener) Status(status int) {
 	s.listener(status)
+}
+
+func (c *Client) DDP() *ddp.Client {
+	return c.ddp
 }
 
 func (c *Client) AddStatusListener(listener func(int)) {
