@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/RocketChat/Rocket.Chat.Go.SDK/models"
@@ -48,6 +49,44 @@ type CreateUserResponse struct {
 		Name         string            `json:"name"`
 		CustomFields map[string]string `json:"customFields"`
 	} `json:"user"`
+}
+
+type userInfoResponse struct {
+	User *models.User `json:"user"`
+	Status
+}
+
+type meResponse struct {
+	models.Me
+	Status
+}
+
+type avatarResponse struct {
+	Url string `json:"url"`
+	Status
+}
+
+type usersResponse struct {
+	Status
+	Users []models.User `json:"users"`
+}
+
+type preferencesResponse struct {
+	Status
+	Preferenses models.Preferences `json:"preferences"`
+}
+
+type settingsResponse struct {
+	Status
+	Settings models.Settings `json:"settings"`
+}
+
+type teamsRequest struct {
+	UserID string `json:"userId"`
+}
+type teamsResponse struct {
+	Teams []models.Team `json:"teams"`
+	Status
 }
 
 type UserStatusResponse struct {
@@ -158,6 +197,32 @@ func (c *Client) UpdateUser(req *models.UpdateUserRequest) (*CreateUserResponse,
 	return response, err
 }
 
+// UserInfo retrieves information about a user.
+// The result is only limited to what the callee has access to view.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-users-info
+func (c *Client) UserInfo(username string) (*models.User, error) {
+	params := url.Values{
+		"username": []string{username},
+	}
+	response := new(userInfoResponse)
+	err := c.Get("users.info", params, response)
+	return response.User, err
+
+}
+
+// GetAvatar gets the URL for a user’s avatar.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-avatar
+func (c *Client) GetAvatar(username string) (string, error) {
+	params := url.Values{
+		"username": []string{username},
+	}
+	response := new(avatarResponse)
+	err := c.Get("users.getAvatar", params, response)
+	return response.Url, err
+}
+
 // SetUserAvatar updates a user's avatar being logged in with a user that has permission to do so.
 // Currently only passing an URL is possible.
 //
@@ -177,4 +242,72 @@ func (c *Client) GetUserStatus(username string) (*UserStatusResponse, error) {
 	response := new(UserStatusResponse)
 	err := c.Get("users.getStatus", params, response)
 	return response, err
+}
+
+// Me returns quick information about the authenticated user.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/other-important-endpoints/authentication-endpoints/me
+func (c *Client) Me() (*models.Me, error) {
+	response := new(meResponse)
+	err := c.Get("me", nil, response)
+	return &response.Me, err
+}
+
+// GetUsers gets all of the users in the system and their information.
+// The result is only limited to what the callee has access to view.
+// It supports the Offset, Count, and Sort Query Parameters.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-users-list
+func (c *Client) GetUsers(page *models.Pagination) ([]models.User, error) {
+	params := url.Values{}
+	if page != nil {
+		params.Add("count", strconv.Itoa(page.Count))
+		params.Add("offset", strconv.Itoa(page.Offset))
+		params.Add("total", strconv.Itoa(page.Total))
+	}
+	response := new(usersResponse)
+	if err := c.Get("users.list", params, response); err != nil {
+		return nil, err
+	}
+	return response.Users, nil
+}
+
+// GetPreferences gets all preferences of the user.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-user-preferences
+func (c *Client) GetPreferences() (*models.Preferences, error) {
+	response := new(preferencesResponse)
+	err := c.Get("users.getPreferences", nil, response)
+	return &response.Preferenses, err
+}
+
+// SetPreferences sets preferences of the user.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/set-preferences
+func (c *Client) SetPreferences(preferences *models.Preferences) (*models.Preferences, error) {
+
+	body, err := json.Marshal(preferences)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(settingsResponse)
+	err = c.Post("users.saveUserPreferences", bytes.NewBuffer(body), response)
+	return &response.Settings.Preferences, err
+}
+
+// ListTeams lists users teams
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/list-users-teams
+func (c *Client) ListTeams(user *models.User) ([]models.Team, error) {
+	request := teamsRequest{UserID: user.ID}
+	body, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(teamsResponse)
+	err = c.Post("users.listTeams", bytes.NewBuffer(body), response)
+	return response.Teams, err
+
 }
