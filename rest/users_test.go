@@ -16,3 +16,10 @@ func TestRocket_LoginLogout(t *testing.T) {
 	// assert.Nil(t, channels)
 	// assert.NotNil(t, err)
 }
+
+func TestRocket_UserInfo(t *testing.T) {
+	rocket := getDefaultClient(t)
+	user, err := rocket.UserInfo(testUserName)
+	assert.Nil(t, err)
+	assert.NotNil(t, user)
+}
