@@ -75,6 +75,11 @@ func (s UserStatusResponse) OK() error {
 	return ResponseErr
 }
 
+type userInfoResponse struct {
+	User *models.User `json:"user"`
+	Status
+}
+
 // Login a user. The Email and the Password are mandatory. The auth token of the user is stored in the Client instance.
 //
 // https://rocket.chat/docs/developer-guides/rest-api/authentication/login
@@ -177,4 +182,18 @@ func (c *Client) GetUserStatus(username string) (*UserStatusResponse, error) {
 	response := new(UserStatusResponse)
 	err := c.Get("users.getStatus", params, response)
 	return response, err
+}
+
+// UserInfo retrieves information about a user.
+// The result is only limited to what the callee has access to view.
+//
+// https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/users-endpoints/get-users-info
+func (c *Client) UserInfo(username string) (*models.User, error) {
+	params := url.Values{
+		"username": []string{username},
+	}
+	response := new(userInfoResponse)
+	err := c.Get("users.info", params, response)
+	return response.User, err
+
 }
